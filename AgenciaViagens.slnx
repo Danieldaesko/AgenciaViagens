@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+  </Folder>
+  <Project Path="AgenciaViagens.API/AgenciaViagens.API.csproj" />
+  <Project Path="AgenciaViagens.Application/AgenciaViagens.Application.csproj" />
+  <Project Path="AgenciaViagens.Domain/AgenciaViagens.Domain.csproj" />
+  <Project Path="AgenciaViagens.Infrastructure/AgenciaViagens.Infrastructure.csproj" />
+  <Project Path="AgenciaViagens.Mobile/AgenciaViagens.Mobile.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
+  <Project Path="AgenciaViagens.Web/AgenciaViagens.Web.csproj" />
+</Solution>
