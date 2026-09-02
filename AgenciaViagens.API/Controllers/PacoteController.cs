@@ -1,10 +1,11 @@
-﻿using AgenciaViagens.Application.Services;
-using AgenciaViagens.Domain.Entities;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AgenciaViagens.Application.Services;
+using AgenciaViagens.Domain.Entities;
 
 namespace AgenciaViagens.API.Controllers
 {
-    [EndpointGroupName("Pacote")]
+    [Tags("Pacote")]
     [Route("api/[controller]")]
     [ApiController]
     public class PacoteController : ControllerBase
@@ -22,7 +23,7 @@ namespace AgenciaViagens.API.Controllers
             var pacotes = await _pacoteService.ObterTodosAsync();
             return Ok(pacotes);
         }
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Pacote>> ObterPorId(int id)
         {
