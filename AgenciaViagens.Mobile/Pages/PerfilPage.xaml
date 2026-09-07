@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AgenciaViagens.Mobile.Pages.PerfilPage"
+             Title="Perfil"
+             BackgroundColor="{StaticResource Pedra}">
+
+    <VerticalStackLayout Padding="18" Spacing="18">
+
+        <Border BackgroundColor="{StaticResource Violeta}" StrokeThickness="0" Padding="24">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{Binding Nome}" FontSize="21" FontAttributes="Bold"
+                       TextColor="White" />
+                <Label Text="{Binding Email}" FontSize="13" TextColor="#DCC8E4" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Border BackgroundColor="White" StrokeThickness="0" Padding="18">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="10">
+                <Label Text="A sua conta" FontSize="15" FontAttributes="Bold"
+                       TextColor="{StaticResource Violeta}" />
+                <Label Text="Para alterar os seus dados, aceda a agenciaviagens.pt"
+                       FontSize="13" TextColor="{StaticResource Cinza}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Button Text="Terminar sessão"
+                Command="{Binding SairCommand}"
+                Style="{StaticResource BotaoVioleta}" />
+    </VerticalStackLayout>
+</ContentPage>    

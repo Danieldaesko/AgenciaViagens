@@ -1,10 +1,12 @@
-﻿namespace AgenciaViagens.Mobile
+﻿using AgenciaViagens.Mobile.Pages;
+
+namespace AgenciaViagens.Mobile;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+        Routing.RegisterRoute("detalhepacote", typeof(DetalhePacotePage));
     }
 }

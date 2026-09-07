@@ -1,0 +1,107 @@
+﻿@model AgenciaViagens.Domain.Entities.Reserva
+@{
+    var valido = (bool)(ViewBag.Valido ?? false);
+    var erroValidacao = ViewBag.ErroValidacao as string;
+    var dias = (Model.Pacote.DataRegresso - Model.Pacote.DataPartida).Days;
+}
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>Confirmar reserva</h1>
+        <p>Reveja os dados antes de finalizar.</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av">
+
+        <nav class="av-passos">
+            <div class="av-passo feito"><span>✓</span>A viagem</div>
+            <div class="av-passo feito"><span>✓</span>Quem viaja</div>
+            <div class="av-passo ativo"><span>3</span>Confirmar</div>
+        </nav>
+
+        @if (TempData["Erro"] != null)
+        {
+            <div class="av-aviso av-aviso-erro">@TempData["Erro"]</div>
+        }
+
+        <div class="av-reserva">
+            <div>
+                <div class="av-caixa">
+                    <h2>A viagem</h2>
+                    <div class="av-linhas-detalhe">
+                        <div class="av-linha-detalhe"><span>Pacote</span><span>@Model.Pacote.Nome</span></div>
+                        <div class="av-linha-detalhe"><span>Percurso</span><span>@Model.Pacote.Origem → @Model.Pacote.Destino</span></div>
+                        <div class="av-linha-detalhe"><span>Partida</span><span>@Model.Pacote.DataPartida.ToString("dd/MM/yyyy")</span></div>
+                        <div class="av-linha-detalhe"><span>Regresso</span><span>@Model.Pacote.DataRegresso.ToString("dd/MM/yyyy")</span></div>
+                        <div class="av-linha-detalhe"><span>Duração</span><span>@dias dias</span></div>
+                        <div class="av-linha-detalhe"><span>Alojamento</span><span>@Model.OpcaoAlojamento</span></div>
+                    </div>
+                </div>
+
+                <div class="av-caixa">
+                    <h2>Viajantes</h2>
+                    @foreach (var p in Model.Participantes)
+                    {
+                        <div class="av-participante">
+                            <div>
+                                <div class="av-participante-nome">@p.Nome</div>
+                                <div class="av-participante-doc">@p.TipoDocumento @p.Documento</div>
+                            </div>
+                            @if (p.ETitular)
+                            {
+                                <span class="av-etiqueta-titular">Titular</span>
+                            }
+                        </div>
+                    }
+                    <a asp-action="Participantes" asp-route-id="@Model.Id"
+                       style="font-size:.85rem;display:inline-block;margin-top:8px">Alterar viajantes</a>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Observacoes))
+                {
+                    <div class="av-caixa">
+                        <h2>A sua nota</h2>
+                        <p style="margin:0;color:var(--carvao)">@Model.Observacoes</p>
+                    </div>
+                }
+
+                <div class="av-aviso av-aviso-info">
+                    Ao confirmar, aceita as condições de cancelamento: devolução total até 30 dias
+                    antes da partida, 75% até 15 dias, 50% até 7 dias.
+                </div>
+            </div>
+
+            <aside class="av-painel">
+                <div class="av-painel-linhas" style="margin-top:0">
+                    <div class="av-painel-linha">
+                        <span>@Model.NumParticipantes @(Model.NumParticipantes == 1 ? "pessoa" : "pessoas")</span>
+                        <span>@((Model.PrecoTotal / Model.NumParticipantes).ToString("C0")) cada</span>
+                    </div>
+                    <div class="av-painel-linha">
+                        <span>Pontos a ganhar</span><span>+@Model.PontosGanhos</span>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px">
+                    <span style="font-size:.9rem;color:var(--cinza)">Total</span>
+                    <span class="av-painel-preco" style="font-size:1.9rem">@Model.PrecoTotal.ToString("C0")</span>
+                </div>
+
+                @if (valido)
+                {
+                    <form asp-action="Confirmar" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn-av btn-av-ocre">Confirmar reserva</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="av-aviso av-aviso-erro" style="margin:0">@erroValidacao</div>
+                    <a class="btn-av btn-av-linha" style="margin-top:12px"
+                       asp-action="Participantes" asp-route-id="@Model.Id">Voltar aos viajantes</a>
+                }
+            </aside>
+        </div>
+    </div>
+</section>

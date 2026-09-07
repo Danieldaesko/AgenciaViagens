@@ -35,8 +35,76 @@ namespace AgenciaViagens.Application.Services
 
         public async Task AdicionarAsync(Reserva reserva)
         {
+
+
             await _context.Reservas.AddAsync(reserva);
             await _context.SaveChangesAsync();
+        }
+
+        // ══ CRIAÇÃO COM CÁLCULO DE PREÇO ═════════════════════
+
+        public async Task<(bool Sucesso, string? Erro, int ReservaId)> CriarReservaAsync(
+            int utilizadorId, int pacoteId, int numParticipantes, string codigoAlojamento, string? observacoes)
+        {
+            var pacote = await _context.Pacotes.FindAsync(pacoteId);
+
+            if (pacote is null || !pacote.Ativo)
+                return (false, "Pacote não encontrado.", 0);
+
+            if (numParticipantes < 1 || numParticipantes > 10)
+                return (false, "Indique entre 1 e 10 viajantes.", 0);
+
+            var disponiveis = pacote.VagasTotal - pacote.VagasOcupadas;
+            if (disponiveis < numParticipantes)
+                return (false, $"Só restam {disponiveis} lugares nesta partida.", 0);
+
+            var alojamento = TipoAlojamento.PorCodigo(codigoAlojamento);
+            if (alojamento is null)
+                return (false, "Escolha um tipo de alojamento.", 0);
+
+            var precoBase = pacote.PrecoPromocao ?? pacote.PrecoBase;
+            var precoPorPessoa = precoBase + alojamento.SuplementoPorPessoa;
+            var total = precoPorPessoa * numParticipantes;
+            var pontos = (int)(total / 10);
+
+            var reserva = new Reserva
+            {
+                UtilizadorId = utilizadorId,
+                PacoteId = pacoteId,
+                NumParticipantes = numParticipantes,
+                PrecoTotal = total,
+                DescontoPontos = 0,
+                Estado = "Pendente",
+                OpcaoAlojamento = alojamento.Nome,
+                PontosGanhos = pontos,
+                Observacoes = observacoes,
+                DataReserva = DateTime.UtcNow
+            };
+
+            await _context.Reservas.AddAsync(reserva);
+            await _context.SaveChangesAsync();
+
+            return (true, null, reserva.Id);
+        }
+
+        public async Task<List<Reserva>> ObterPorUtilizadorAsync(int utilizadorId)
+        {
+            return await _context.Reservas
+                .Include(r => r.Pacote)
+                .Include(r => r.Participantes)
+                .Where(r => r.UtilizadorId == utilizadorId)
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
+        }
+
+        public async Task<Reserva?> ObterDoUtilizadorAsync(int reservaId, int utilizadorId)
+        {
+            return await _context.Reservas
+                .Include(r => r.Pacote)
+                    .ThenInclude(p => p.Itinerarios)
+                .Include(r => r.Participantes)
+                .Include(r => r.Pagamentos)
+                .FirstOrDefaultAsync(r => r.Id == reservaId && r.UtilizadorId == utilizadorId);
         }
 
         // ══ PARTICIPANTES ════════════════════════════════════
@@ -168,3 +236,6 @@ namespace AgenciaViagens.Application.Services
         }
     }
 }
+
+
+

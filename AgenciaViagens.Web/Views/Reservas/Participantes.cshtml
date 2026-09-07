@@ -1,0 +1,147 @@
+﻿@model AgenciaViagens.Domain.Entities.Reserva
+@{
+    var registados = Model.Participantes.Count;
+    var esperados = Model.NumParticipantes;
+    var faltam = esperados - registados;
+    var temTitular = Model.Participantes.Any(p => p.ETitular);
+}
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>Quem viaja</h1>
+        <p>@Model.Pacote.Nome · reserva #@Model.Id</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av">
+
+        <nav class="av-passos">
+            <div class="av-passo feito"><span>✓</span>A viagem</div>
+            <div class="av-passo ativo"><span>2</span>Quem viaja</div>
+            <div class="av-passo"><span>3</span>Confirmar</div>
+        </nav>
+
+        @if (TempData["Erro"] != null)
+        {
+            <div class="av-aviso av-aviso-erro">@TempData["Erro"]</div>
+        }
+
+        <div class="av-reserva">
+            <div>
+                <div class="av-progresso">
+                    <strong>@registados de @esperados</strong> viajantes registados.
+                    @if (faltam > 0)
+                    {
+                        <text>Falta@(faltam > 1 ? "m" : "") @faltam.</text>
+                    }
+                </div>
+
+                @if (Model.Participantes.Any())
+                {
+                    <div class="av-caixa">
+                        <h2>Já registados</h2>
+                        @foreach (var p in Model.Participantes)
+                        {
+                            <div class="av-participante">
+                                <div>
+                                    <div class="av-participante-nome">@p.Nome</div>
+                                    <div class="av-participante-doc">@p.TipoDocumento @p.Documento</div>
+                                </div>
+                                @if (p.ETitular)
+                                {
+                                    <span class="av-etiqueta-titular">Titular</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (faltam > 0)
+                {
+                    <div class="av-caixa">
+                        <h2>Adicionar viajante</h2>
+                        <p>Os dados têm de coincidir com o documento de identificação.</p>
+
+                        <form asp-action="AdicionarParticipante" asp-route-id="@Model.Id" method="post">
+                            <div class="av-campo-form">
+                                <label>Nome completo</label>
+                                <input name="Nome" required placeholder="Como está no documento" />
+                            </div>
+
+                            <div class="av-campo-duplo">
+                                <div class="av-campo-form">
+                                    <label>Tipo de documento</label>
+                                    <select name="TipoDocumento">
+                                        <option value="CC">Cartão de Cidadão</option>
+                                        <option value="Passaporte">Passaporte</option>
+                                    </select>
+                                </div>
+                                <div class="av-campo-form">
+                                    <label>Nº do documento</label>
+                                    <input name="Documento" required />
+                                </div>
+                            </div>
+
+                            <div class="av-campo-duplo">
+                                <div class="av-campo-form">
+                                    <label>Data de nascimento</label>
+                                    <input name="DataNascimento" type="date" />
+                                </div>
+                                <div class="av-campo-form">
+                                    <label>Nacionalidade</label>
+                                    <input name="Nacionalidade" placeholder="Portuguesa" />
+                                </div>
+                            </div>
+
+                            @if (!temTitular)
+                            {
+                                <label class="av-lembrar" style="margin-bottom:14px">
+                                    <input name="ETitular" type="checkbox" value="true" checked />
+                                    É o titular da reserva
+                                </label>
+                                <input type="hidden" name="ETitular" value="false" />
+                            }
+
+                            <button type="submit" class="btn-av btn-av-azul">Adicionar viajante</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="av-aviso av-aviso-ok">
+                        Todos os viajantes estão registados. Pode avançar para a confirmação.
+                    </div>
+                }
+            </div>
+
+            <aside class="av-painel">
+                <div style="font-family:var(--ff-titulo);font-size:1.1rem;font-weight:700;color:var(--carvao);margin-bottom:16px">
+                    @Model.Pacote.Nome
+                </div>
+
+                <div class="av-painel-linhas">
+                    <div class="av-painel-linha"><span>Viajantes</span><span>@esperados</span></div>
+                    <div class="av-painel-linha"><span>Alojamento</span><span>@Model.OpcaoAlojamento</span></div>
+                    <div class="av-painel-linha"><span>Partida</span><span>@Model.Pacote.DataPartida.ToString("dd/MM/yyyy")</span></div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px">
+                    <span style="font-size:.9rem;color:var(--cinza)">Total</span>
+                    <span class="av-painel-preco" style="font-size:1.7rem">@Model.PrecoTotal.ToString("C0")</span>
+                </div>
+
+                @if (faltam == 0)
+                {
+                    <a class="btn-av btn-av-ocre" asp-action="Confirmar" asp-route-id="@Model.Id">
+                        Rever e confirmar
+                    </a>
+                }
+                else
+                {
+                    <div class="av-esgotado">Registe todos os viajantes para continuar.</div>
+                }
+            </aside>
+        </div>
+    </div>
+</section>

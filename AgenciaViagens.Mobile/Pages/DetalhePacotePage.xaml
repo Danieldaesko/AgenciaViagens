@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:AgenciaViagens.Mobile.Models"
+             x:Class="AgenciaViagens.Mobile.Pages.DetalhePacotePage"
+             Title="Viagem"
+             BackgroundColor="{StaticResource Pedra}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <BoxView HeightRequest="180" Color="{StaticResource Violeta}" />
+
+            <VerticalStackLayout Padding="18" Spacing="16" BindingContext="{Binding Pacote}">
+
+                <Label Text="{Binding Percurso}" FontSize="12"
+                       TextColor="{StaticResource Cinza}" />
+                <Label Text="{Binding Nome}" FontSize="23" FontAttributes="Bold"
+                       TextColor="{StaticResource Carvao}" Margin="0,-10,0,0" />
+
+                <Border BackgroundColor="White" StrokeThickness="0" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" RowSpacing="3">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Duração" FontSize="11"
+                               TextColor="{StaticResource Cinza}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Dias, StringFormat='{0} dias'}"
+                               FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Violeta}" />
+
+                        <Label Grid.Row="0" Grid.Column="1" Text="Partida" FontSize="11"
+                               TextColor="{StaticResource Cinza}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding DataPartida, StringFormat='{0:dd MMM}'}"
+                               FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Violeta}" />
+
+                        <Label Grid.Row="0" Grid.Column="2" Text="Tipo" FontSize="11"
+                               TextColor="{StaticResource Cinza}" />
+                        <Label Grid.Row="1" Grid.Column="2" Text="{Binding Categoria}"
+                               FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Violeta}" />
+                    </Grid>
+                </Border>
+
+                <Label Text="A viagem" FontSize="17" FontAttributes="Bold"
+                       TextColor="{StaticResource Violeta}" />
+                <Label Text="{Binding Descricao}" FontSize="14" LineHeight="1.5"
+                       TextColor="{StaticResource Carvao}" />
+
+                <Border BackgroundColor="White" StrokeThickness="0" Padding="18">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding PrecoFormatado}" FontSize="30"
+                               FontAttributes="Bold" TextColor="{StaticResource Violeta}" />
+                        <Label Text="por pessoa" FontSize="12" TextColor="{StaticResource Cinza}" />
+                        <Label Text="{Binding TextoVagas}" FontSize="13"
+                               TextColor="{StaticResource Laranja}" FontAttributes="Bold"
+                               Margin="0,6,0,0" />
+                        <Label Text="Para reservar, aceda a agenciaviagens.pt"
+                               FontSize="12" TextColor="{StaticResource Cinza}"
+                               Margin="0,8,0,0" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Padding="18,0,18,24" Spacing="10"
+                                 IsVisible="{Binding TemItinerario}">
+                <Label Text="Dia a dia" FontSize="17" FontAttributes="Bold"
+                       TextColor="{StaticResource Violeta}" />
+
+                <CollectionView ItemsSource="{Binding Itinerario}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ItinerarioModel">
+                            <Border BackgroundColor="White" StrokeThickness="0"
+                                    Margin="0,0,0,8" Padding="14">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10" />
+                                </Border.StrokeShape>
+                                <Grid ColumnDefinitions="60,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0" BackgroundColor="{StaticResource Violeta}"
+                                            StrokeThickness="0" Padding="6" VerticalOptions="Start">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="6" />
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding DiaTexto}" TextColor="White"
+                                               FontSize="12" FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                        <Label Text="{Binding Titulo}" FontSize="14"
+                                               FontAttributes="Bold" TextColor="{StaticResource Carvao}" />
+                                        <Label Text="{Binding Descricao}" FontSize="12"
+                                               TextColor="{StaticResource Cinza}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

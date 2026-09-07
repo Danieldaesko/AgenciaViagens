@@ -1,0 +1,135 @@
+﻿@model AgenciaViagens.Domain.Entities.Pacote
+@{
+    var vagas = Model.VagasTotal - Model.VagasOcupadas;
+    var dias = (Model.DataRegresso - Model.DataPartida).Days;
+    var preco = Model.PrecoPromocao ?? Model.PrecoBase;
+    var avaliacoes = Model.Avaliacoes?.Where(a => a.Aprovada).ToList() ?? new();
+    var media = avaliacoes.Any() ? avaliacoes.Average(a => a.Classificacao) : 0;
+}
+
+<div class="container-av av-detalhe">
+
+    <div>
+        <div class="av-detalhe-capa">
+            @if (!string.IsNullOrEmpty(Model.ImagemUrl))
+            {
+                <img src="@Model.ImagemUrl" alt="@Model.Destino" />
+            }
+        </div>
+
+        <h1>@Model.Nome</h1>
+        <p class="av-detalhe-local">
+            @Model.Destino, @Model.Pais
+            @if (avaliacoes.Any())
+            {
+                <span> · @media.ToString("0.0") de 5 em @avaliacoes.Count avaliações</span>
+            }
+        </p>
+
+        <dl class="av-detalhe-factos">
+            <div class="av-facto">
+                <dt>Duração</dt>
+                <dd>@dias dias</dd>
+            </div>
+            <div class="av-facto">
+                <dt>Partida</dt>
+                <dd>@Model.DataPartida.ToString("dd MMM")</dd>
+            </div>
+            <div class="av-facto">
+                <dt>Regresso</dt>
+                <dd>@Model.DataRegresso.ToString("dd MMM")</dd>
+            </div>
+            <div class="av-facto">
+                <dt>Tipo</dt>
+                <dd>@Model.Categoria</dd>
+            </div>
+        </dl>
+
+        <div class="av-bloco">
+            <h2>A viagem</h2>
+            <p>@Model.Descricao</p>
+        </div>
+
+        @if (Model.Itinerarios != null && Model.Itinerarios.Any())
+        {
+            <div class="av-bloco">
+                <h2>Dia a dia</h2>
+                <ol class="av-itinerario">
+                    @foreach (var it in Model.Itinerarios.OrderBy(i => i.Dia))
+                    {
+                        <li class="av-dia">
+                            <div class="av-dia-num">
+                                <span>Dia</span>
+                                <strong>@it.Dia</strong>
+                            </div>
+                            <div class="av-dia-texto">
+                                <h4>@it.Titulo</h4>
+                                <p>@it.Descricao</p>
+                                @if (!string.IsNullOrEmpty(it.Local))
+                                {
+                                    <div class="av-dia-local">@it.Local</div>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ol>
+            </div>
+        }
+
+        @if (avaliacoes.Any())
+        {
+            <div class="av-bloco">
+                <h2>Quem já foi</h2>
+                @foreach (var a in avaliacoes.OrderByDescending(x => x.Data).Take(5))
+                {
+                    <div class="av-avaliacao">
+                        <div class="av-estrelas">@(new string('★', a.Classificacao))@(new string('☆', 5 - a.Classificacao))</div>
+                        <p>@a.Comentario</p>
+                        <time>@a.Data.ToString("MMMM 'de' yyyy")</time>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <aside class="av-painel">
+        <div class="av-painel-preco">
+            @if (Model.PrecoPromocao.HasValue)
+            {
+                <span class="av-painel-riscado">@Model.PrecoBase.ToString("C0")</span><br />
+            }
+            @preco.ToString("C0")
+            <small>por pessoa</small>
+        </div>
+
+        <div class="av-painel-linhas">
+            <div class="av-painel-linha">
+                <span>Duração</span><span>@dias dias</span>
+            </div>
+            <div class="av-painel-linha">
+                <span>Partida</span><span>@Model.DataPartida.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="av-painel-linha">
+                <span>Lugares</span>
+                <span class="@(vagas <= 3 ? "av-vagas-poucas" : "")">@vagas de @Model.VagasTotal</span>
+            </div>
+        </div>
+
+        @if (vagas > 0)
+        {
+            <a class="btn-av btn-av-ocre"
+               asp-controller="Reservas" asp-action="Nova" asp-route-pacoteId="@Model.Id">
+                Reservar esta viagem
+            </a>
+            <p class="av-painel-nota">
+                Não é cobrado nada agora. Cancelamento com devolução total até 30 dias antes da partida.
+            </p>
+        }
+        else
+        {
+            <div class="av-esgotado">
+                Esta partida está esgotada. Contacte-nos para saber de outras datas.
+            </div>
+        }
+    </aside>
+</div> 

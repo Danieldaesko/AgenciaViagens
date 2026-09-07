@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Shell
-    x:Class="AgenciaViagens.Mobile.AppShell"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:AgenciaViagens.Mobile"
-    Title="AgenciaViagens.Mobile">
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:AgenciaViagens.Mobile.Pages"
+       x:Class="AgenciaViagens.Mobile.AppShell"
+       Shell.FlyoutBehavior="Disabled"
+       Shell.NavBarHasShadow="False"
+       Shell.BackgroundColor="{StaticResource Violeta}"
+       Shell.ForegroundColor="White"
+       Shell.TitleColor="White"
+       Shell.TabBarBackgroundColor="White"
+       Shell.TabBarTitleColor="{StaticResource Violeta}"
+       Shell.TabBarUnselectedColor="{StaticResource Cinza}">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <ShellContent Route="login"
+                  ContentTemplate="{DataTemplate pages:LoginPage}"
+                  Shell.FlyoutItemIsVisible="False"
+                  Shell.TabBarIsVisible="False" />
 
+    <TabBar Route="app">
+        <ShellContent Title="Início" Route="inicio"
+                      ContentTemplate="{DataTemplate pages:InicioPage}" />
+        <ShellContent Title="Pacotes" Route="pacotes"
+                      ContentTemplate="{DataTemplate pages:PacotesPage}" />
+        <ShellContent Title="Reservas" Route="reservas"
+                      ContentTemplate="{DataTemplate pages:ReservasPage}" />
+        <ShellContent Title="Perfil" Route="perfil"
+                      ContentTemplate="{DataTemplate pages:PerfilPage}" />
+    </TabBar>
 </Shell>

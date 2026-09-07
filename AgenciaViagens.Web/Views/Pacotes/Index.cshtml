@@ -1,0 +1,190 @@
+﻿@model AgenciaViagens.Application.DTOs.ResultadoPaginadoDTO<AgenciaViagens.Domain.Entities.Pacote>
+@{
+    var f = (AgenciaViagens.Application.DTOs.FiltroPacotesDTO)ViewBag.Filtro;
+    var destinos = (List<string>)(ViewBag.Destinos ?? new List<string>());
+    var categorias = (List<string>)(ViewBag.Categorias ?? new List<string>());
+}
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>Pacotes de viagem</h1>
+        <p>Partidas confirmadas de Lisboa e Porto, com itinerário fechado.</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av av-layout-filtros">
+
+        <aside class="av-filtros">
+            <form method="get" asp-action="Index">
+                <h3>Afinar resultados</h3>
+
+                <div class="av-filtro-grupo">
+                    <label for="destino">Destino</label>
+                    <input type="text" id="destino" name="destino" value="@f.Destino"
+                           list="destinos" placeholder="Qualquer" />
+                    <datalist id="destinos">
+                        @foreach (var d in destinos)
+                        {
+                            <option value="@d"></option>
+                        }
+                    </datalist>
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label for="categoria">Tipo de viagem</label>
+                    <select id="categoria" name="categoria">
+                        <option value="">Todos</option>
+                        @foreach (var c in categorias)
+                        {
+                            <option value="@c" selected="@(f.Categoria == c)">@c</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label>Preço por pessoa</label>
+                    <div class="av-filtro-duplo">
+                        <input type="number" name="precoMin" value="@f.PrecoMin" placeholder="Mín" min="0" step="50" />
+                        <input type="number" name="precoMax" value="@f.PrecoMax" placeholder="Máx" min="0" step="50" />
+                    </div>
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label for="dataDe">Parte depois de</label>
+                    <input type="date" id="dataDe" name="dataPartidaDe"
+                           value="@(f.DataPartidaDe?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label for="dataAte">Parte antes de</label>
+                    <input type="date" id="dataAte" name="dataPartidaAte"
+                           value="@(f.DataPartidaAte?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label class="av-filtro-check">
+                        <input type="checkbox" name="emPromocao" value="true"
+                               checked="@(f.EmPromocao == true)" />
+                        Só promoções
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-av btn-av-azul">Aplicar</button>
+                <a class="av-limpar" asp-action="Index">Limpar filtros</a>
+            </form>
+        </aside>
+
+        <div>
+            <div class="av-resultados-topo">
+                <span><strong>@Model.Total</strong> @(Model.Total == 1 ? "viagem encontrada" : "viagens encontradas")</span>
+                @if (Model.TotalPaginas > 1)
+                {
+                    <span>Página @Model.Pagina de @Model.TotalPaginas</span>
+                }
+            </div>
+
+            @if (Model.Itens.Any())
+            {
+                <div class="av-grelha">
+                    @foreach (var p in Model.Itens)
+                    {
+                        var vagas = p.VagasTotal - p.VagasOcupadas;
+                        var dias = (p.DataRegresso - p.DataPartida).Days;
+                        var preco = p.PrecoPromocao ?? p.PrecoBase;
+
+                        <article class="av-cartao">
+                            <div class="av-cartao-img">
+                                @if (!string.IsNullOrEmpty(p.ImagemUrl))
+                                {
+                                    <img src="@p.ImagemUrl" alt="@p.Destino" loading="lazy" />
+                                }
+                                @if (p.EmPromocao)
+                                {
+                                    <span class="av-etiqueta av-etiqueta-promo">Promoção</span>
+                                }
+                                else if (p.EmDestaque)
+                                {
+                                    <span class="av-etiqueta">Destaque</span>
+                                }
+                            </div>
+
+                            <div class="av-cartao-corpo">
+                                <div class="av-cartao-local">@p.Origem → @p.Destino, @p.Pais</div>
+                                <h3>@p.Nome</h3>
+                                <p class="av-cartao-desc">@p.Descricao</p>
+
+                                <div class="av-cartao-meta">
+                                    <span>@dias dias</span>
+                                    <span>@p.DataPartida.ToString("dd MMM")</span>
+                                    <span>@p.Categoria</span>
+                                </div>
+
+                                <div class="av-cartao-rodape">
+                                    <div>
+                                        <div class="av-preco">@preco.ToString("C0")<small>/pessoa</small></div>
+                                        <div class="av-vagas @(vagas <= 3 ? "av-vagas-poucas" : "")">
+                                            @(vagas <= 3 ? $"Só {vagas} lugares" : $"{vagas} lugares")
+                                        </div>
+                                    </div>
+                                    <a class="btn-av btn-av-azul" asp-action="Detalhe" asp-route-id="@p.Id">Ver viagem</a>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+
+                @if (Model.TotalPaginas > 1)
+                {
+                    <nav class="av-paginacao">
+                        @if (Model.TemAnterior)
+                        {
+                            <a asp-action="Index" asp-route-pagina="@(Model.Pagina - 1)"
+                               asp-route-destino="@f.Destino" asp-route-categoria="@f.Categoria"
+                               asp-route-precoMin="@f.PrecoMin" asp-route-precoMax="@f.PrecoMax">Anterior</a>
+                        }
+                        else
+                        {
+
+                            <span class="inativa">Anterior</span>
+                        }
+
+                        @for (var i = 1; i <= Model.TotalPaginas; i++)
+                        {
+                            if (i == Model.Pagina)
+                            {
+                                <span class="ativa">@i</span>
+                            }
+                            else
+                            {
+                                <a asp-action="Index" asp-route-pagina="@i"
+                                   asp-route-destino="@f.Destino" asp-route-categoria="@f.Categoria"
+                                   asp-route-precoMin="@f.PrecoMin" asp-route-precoMax="@f.PrecoMax">@i</a>
+                            }
+                        }
+
+                        @if (Model.TemSeguinte)
+                        {
+                            <a asp-action="Index" asp-route-pagina="@(Model.Pagina + 1)"
+                               asp-route-destino="@f.Destino" asp-route-categoria="@f.Categoria"
+                               asp-route-precoMin="@f.PrecoMin" asp-route-precoMax="@f.PrecoMax">Seguinte</a>
+                        }
+                        else
+                        {
+
+                            <span class="inativa">Seguinte</span>
+                        }
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="av-vazio">
+                    <h3>Nada corresponde a esta pesquisa</h3>
+                    <p>Experimente alargar o intervalo de datas ou aumentar o preço máximo.</p>
+                    <a class="btn-av btn-av-azul" asp-action="Index">Ver todas as viagens</a>
+                </div>
+            }
+        </div>
+    </div>
+</section>

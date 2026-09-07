@@ -11,5 +11,5 @@ public class Participante
     public string? Nacionalidade { get; set; }
     public bool ETitular { get; set; } = false;
 
-    public Reserva Reserva { get; set; } = null!;
+    public Reserva? Reserva { get; set; } 
 }

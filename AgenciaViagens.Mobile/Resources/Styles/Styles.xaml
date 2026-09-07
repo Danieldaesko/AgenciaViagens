@@ -437,4 +437,43 @@
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
+    <!-- Cores AgenciaViagens -->
+    <Color x:Key="Violeta">#7B2D8E</Color>
+    <Color x:Key="VioletaForte">#5C1F6B</Color>
+    <Color x:Key="VioletaSuave">#F4EAF7</Color>
+    <Color x:Key="Laranja">#F58220</Color>
+    <Color x:Key="Pedra">#F8F7F9</Color>
+    <Color x:Key="Carvao">#1F1A22</Color>
+    <Color x:Key="Cinza">#6E6873</Color>
+    <Color x:Key="Linha">#E4E0E8</Color>
+
+    <Style x:Key="TituloPagina" TargetType="Label">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{StaticResource Carvao}" />
+    </Style>
+
+    <Style x:Key="BotaoLaranja" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Laranja}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <Style x:Key="BotaoVioleta" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Violeta}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <Style x:Key="CampoEntrada" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="TextColor" Value="{StaticResource Carvao}" />
+        <Setter Property="PlaceholderColor" Value="#ABA5B0" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
 </ResourceDictionary>

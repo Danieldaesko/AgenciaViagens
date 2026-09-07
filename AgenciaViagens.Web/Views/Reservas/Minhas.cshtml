@@ -1,0 +1,54 @@
+﻿@model List<AgenciaViagens.Domain.Entities.Reserva>
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>As minhas reservas</h1>
+        <p>Todas as suas viagens, passadas e futuras.</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av">
+
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="av-aviso av-aviso-ok">@TempData["Sucesso"]</div>
+        }
+        @if (TempData["Erro"] != null)
+        {
+            <div class="av-aviso av-aviso-erro">@TempData["Erro"]</div>
+        }
+
+        @if (Model.Any())
+        {
+            @foreach (var r in Model)
+            {
+                <article class="av-reserva-cartao">
+                    <div>
+                        <div class="av-reserva-ref">Reserva #@r.Id · @r.DataReserva.ToString("dd/MM/yyyy")</div>
+                        <h3>@r.Pacote.Nome</h3>
+                        <div class="av-reserva-meta">
+                            @r.Pacote.Origem → @r.Pacote.Destino ·
+                            @r.NumParticipantes @(r.NumParticipantes == 1 ? "pessoa" : "pessoas") ·
+                            parte a @r.Pacote.DataPartida.ToString("dd MMM yyyy")
+                        </div>
+                    </div>
+
+                    <div class="av-reserva-lado">
+                        <span class="av-estado av-estado-@r.Estado.ToLower()">@r.Estado</span>
+                        <div class="av-reserva-total">@r.PrecoTotal.ToString("C0")</div>
+                        <a class="btn-av btn-av-linha" asp-action="Detalhe" asp-route-id="@r.Id">Ver detalhe</a>
+                    </div>
+                </article>
+            }
+        }
+        else
+        {
+            <div class="av-vazio">
+                <h3>Ainda não tem reservas</h3>
+                <p>Quando reservar uma viagem, ela aparece aqui.</p>
+                <a class="btn-av btn-av-azul" asp-controller="Pacotes" asp-action="Index">Ver viagens</a>
+            </div>
+        }
+    </div>
+</section>

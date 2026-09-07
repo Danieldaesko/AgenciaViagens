@@ -1,49 +1,108 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Identity
+@using AgenciaViagens.Infrastructure.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<!DOCTYPE html>
+<html lang="pt">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AgenciaViagens.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AgenciaViagens.Web.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] · AgenciaViagens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/agenciaviagens.css" asp-append-version="true" />
+    @await RenderSectionAsync("Estilos", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AgenciaViagens.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+    <nav class="av-nav">
+        <div class="container-av av-nav-inner">
+            <a class="av-marca" asp-controller="Home" asp-action="Index">
+                <span class="av-marca-nome">Agencia<span>Viagens</span><em>.pt</em></span>
+                <span class="av-marca-legenda">Agência de Viagens</span>
+            </a>
+
+            <ul class="av-links">
+                <li><a asp-controller="Home" asp-action="Index">Início</a></li>
+                <li><a asp-controller="Pacotes" asp-action="Index">Pacotes</a></li>
+                <li><a asp-controller="Home" asp-action="Sobre">Sobre nós</a></li>
+                <li><a asp-controller="Home" asp-action="Contacto">Contacto</a></li>
+            </ul>
+
+            <div class="av-nav-conta">     
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var utilizadorAtual = await UserManager.GetUserAsync(User);
+
+                    <a asp-controller="Reservas" asp-action="Minhas">As minhas reservas</a>
+                    <a asp-controller="Conta" asp-action="Perfil">@(utilizadorAtual?.Nome ?? "A minha conta")</a>
+                    <form asp-controller="Conta" asp-action="Logout" method="post" style="display:inline">
+                        <button type="submit" class="btn-av btn-av-ocre">Sair</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Conta" asp-action="Login">Entrar</a>
+                    <a class="btn-av btn-av-ocre" asp-controller="Conta" asp-action="Registo">Criar conta</a>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        @RenderBody()
+    </main>   
+
+    <footer class="av-rodape">
+        <div class="container-av">
+            <div class="av-rodape-grelha">
+                <div>
+                    <a class="av-marca" asp-controller="Home" asp-action="Index">
+                        <span class="av-marca-nome" style="font-size:1.3rem">Agencia<span>Viagens</span><em>.pt</em></span>
+                        <span class="av-marca-legenda">Agência de Viagens</span>
+                    </a>
+                    <p style="margin-top:12px; max-width:34ch; line-height:1.6">
+                        Organizamos viagens desde 1998. Cada itinerário é montado por quem já esteve lá.
+                    </p>
+                </div>
+                <div>
+                    <h5>Viajar</h5>
+                    <ul>
+                        <li><a asp-controller="Pacotes" asp-action="Index">Todos os pacotes</a></li>
+                        <li><a asp-controller="Pacotes" asp-action="Index" asp-route-emPromocao="true">Promoções</a></li>
+                        <li><a asp-controller="Pacotes" asp-action="Index" asp-route-categoria="cultura">Cultura</a></li>
+                        <li><a asp-controller="Pacotes" asp-action="Index" asp-route-categoria="praia">Praia</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Ajuda</h5>
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Contacto">Falar connosco</a></li>
+                        <li><a href="#">Condições de cancelamento</a></li>
+                        <li><a href="#">Perguntas frequentes</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Contactos</h5>
+                    <ul>
+                        <li>Rua das Portas de Santo Antão 47<br>1150-264 Lisboa</li>
+                        <li style="margin-top:10px">213 456 789</li>
+                        <li><a href="mailto:geral@agenciaviagens.pt">geral@agenciaviagens.pt</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - AgenciaViagens.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="av-rodape-fim">
+                <span>© @DateTime.Now.Year AgenciaViagens · RNAVT 1234</span>
+                <span>Projeto CET 105 — Daniel Kololo</span>
+            </div>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

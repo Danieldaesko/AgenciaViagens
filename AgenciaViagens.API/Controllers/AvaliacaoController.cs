@@ -1,5 +1,7 @@
-﻿using AgenciaViagens.Application.Services;
+﻿using AgenciaViagens.Application.DTOs;
+using AgenciaViagens.Application.Services;
 using AgenciaViagens.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgenciaViagens.API.Controllers
@@ -16,6 +18,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Avaliacao>>> ObterTodas()
         {
             var avaliacoes = await _avaliacaoService.ObterTodasAsync();
@@ -23,6 +26,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Avaliacao>> ObterPorId(int id)
         {
             var avaliacao = await _avaliacaoService.ObterPorIdAsync(id);
@@ -31,8 +35,21 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Criar([FromBody] Avaliacao avaliacao)
+        [Authorize]
+        public async Task<ActionResult<Avaliacao>> Criar([FromBody] CriarAvaliacaoDTO dto)
         {
+            if (dto.Classificacao < 1 || dto.Classificacao > 5)
+                return BadRequest(new { erro = "A classificação deve estar entre 1 e 5." });
+
+            var avaliacao = new Avaliacao
+            {
+                UtilizadorId = dto.UtilizadorId,
+                PacoteId = dto.PacoteId,
+                Classificacao = dto.Classificacao,
+                Comentario = dto.Comentario,
+                Aprovada = false
+            };
+
             await _avaliacaoService.AdicionarAsync(avaliacao);
             return CreatedAtAction(nameof(ObterPorId), new { id = avaliacao.Id }, avaliacao);
         }

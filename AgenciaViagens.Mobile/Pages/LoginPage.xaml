@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AgenciaViagens.Mobile.Pages.LoginPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Violeta}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28" Spacing="0" VerticalOptions="Center">
+
+            <Label Text="AGENCIAVIAGENS.PT"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{StaticResource Laranja}"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Agência de Viagens"
+                   FontSize="13" TextColor="#DCC8E4"
+                   HorizontalOptions="Center"
+                   Margin="0,4,0,36" />
+
+            <Border BackgroundColor="White"
+                    StrokeThickness="0"
+                    Padding="26">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label Text="Entrar" Style="{StaticResource TituloPagina}" />
+                    <Label Text="Aceda às suas reservas e itinerários."
+                           FontSize="13" TextColor="{StaticResource Cinza}"
+                           Margin="0,-8,0,4" />
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Email" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource Carvao}" />
+                        <Border Stroke="{StaticResource Linha}" StrokeThickness="1" Padding="10,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding Email}"
+                                   Placeholder="nome@exemplo.pt"
+                                   Keyboard="Email"
+                                   Style="{StaticResource CampoEntrada}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Palavra-passe" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource Carvao}" />
+                        <Border Stroke="{StaticResource Linha}" StrokeThickness="1" Padding="10,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding Password}"
+                                   IsPassword="True"
+                                   Style="{StaticResource CampoEntrada}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding MensagemErro}"
+                           TextColor="#C0392B" FontSize="13"
+                           IsVisible="{Binding MensagemErro, Converter={StaticResource NuloParaFalso}}" />
+
+                    <Button Text="Entrar"
+                            Command="{Binding EntrarCommand}"
+                            IsEnabled="{Binding NaoOcupado}"
+                            Style="{StaticResource BotaoLaranja}" />
+
+                    <ActivityIndicator IsRunning="{Binding Ocupado}"
+                                       IsVisible="{Binding Ocupado}"
+                                       Color="{StaticResource Violeta}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Ainda não tem conta? Crie uma em agenciaviagens.pt"
+                   FontSize="12" TextColor="#DCC8E4"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,20,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

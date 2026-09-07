@@ -1,6 +1,9 @@
-﻿using AgenciaViagens.Application.Services;
+﻿using AgenciaViagens.Application.DTOs;
+using AgenciaViagens.Application.Services;
 using AgenciaViagens.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using AgenciaViagens.Infrastructure.Identity;
 
 namespace AgenciaViagens.API.Controllers
 {
@@ -16,6 +19,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Itinerario>>> ObterTodos()
         {
             var itinerarios = await _itinerarioService.ObterTodosAsync();
@@ -23,6 +27,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Itinerario>> ObterPorId(int id)
         {
             var itinerario = await _itinerarioService.ObterPorIdAsync(id);
@@ -31,8 +36,18 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Criar([FromBody] Itinerario itinerario)
+        [Authorize(Roles = $"{Roles.Admin},{Roles.Colaborador}")]
+        public async Task<ActionResult<Itinerario>> Criar([FromBody] CriarItinerarioDTO dto)
         {
+            var itinerario = new Itinerario
+            {
+                PacoteId = dto.PacoteId,
+                Dia = dto.Dia,
+                Titulo = dto.Titulo,
+                Descricao = dto.Descricao,
+                Local = dto.Local
+            };
+
             await _itinerarioService.AdicionarAsync(itinerario);
             return CreatedAtAction(nameof(ObterPorId), new { id = itinerario.Id }, itinerario);
         }

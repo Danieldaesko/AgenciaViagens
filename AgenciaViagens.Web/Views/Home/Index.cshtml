@@ -1,8 +1,159 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<AgenciaViagens.Domain.Entities.Pacote>
+@{
+    var pacotes = Model ?? new List<AgenciaViagens.Domain.Entities.Pacote>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="av-heroi">
+    <div class="container-av">    
+        <div class="av-heroi-conteudo">
+            <h1>Onde é que vai ser desta vez?</h1>
+            <p>
+                Sete dias em Roma, uma semana nos Açores ou duas em Tóquio.
+                Escolha o destino — o resto tratamos nós.
+            </p>
+
+           
+
+        </div>
+
+        <form class="av-pesquisa" asp-controller="Pacotes" asp-action="Index" method="get">
+            <div class="av-campo">
+                <label for="origem">Partida de</label>
+                <select id="origem" name="origem">
+                    <option value="">Qualquer</option>
+                    @foreach (var o in (List<string>)(ViewBag.Origens ?? new List<string>()))
+                    {
+                        <option value="@o">@o</option>
+                    }
+                </select>
+            </div>
+
+            <div class="av-campo">
+                <label for="destino">Destino</label>
+                <input type="text" id="destino" name="destino" list="lista-destinos"
+                       placeholder="Cidade ou país" />
+                <datalist id="lista-destinos">
+                    @foreach (var d in (List<string>)(ViewBag.Destinos ?? new List<string>()))
+                    {
+                        <option value="@d"></option>
+                    }
+                </datalist>
+            </div>
+
+            <div class="av-campo">
+                <label for="dataDe">Data de partida</label>
+                <input type="date" id="dataDe" name="dataPartidaDe" />
+            </div>
+
+            <div class="av-campo">
+                <label for="viajantes">Viajantes</label>
+                <select id="viajantes" name="viajantes">
+                    @for (var i = 1; i <= 8; i++)
+                    {
+                        <option value="@i">@i @(i == 1 ? "pessoa" : "pessoas")</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn-av btn-av-ocre">Ver viagens</button>
+        </form>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av">
+        <div class="av-seccao-topo">
+            <div>
+                <h2>Em destaque</h2>
+                <p>Partidas confirmadas com lugares ainda por preencher.</p>
+            </div>
+            <a class="btn-av btn-av-linha" asp-controller="Pacotes" asp-action="Index">Ver todos</a>
+        </div>
+
+        @if (pacotes.Any())
+        {
+            <div class="av-grelha">
+                @foreach (var p in pacotes)
+                {
+                    var vagas = p.VagasTotal - p.VagasOcupadas;
+                    var dias = (p.DataRegresso - p.DataPartida).Days;
+                    var preco = p.PrecoPromocao ?? p.PrecoBase;
+
+                    <article class="av-cartao">
+                        <div class="av-cartao-img">
+                            @if (!string.IsNullOrEmpty(p.ImagemUrl))
+                            {
+                                <img src="@p.ImagemUrl" alt="@p.Destino" loading="lazy" />
+                            }
+                            @if (p.EmPromocao)
+                            {
+                                <span class="av-etiqueta av-etiqueta-promo">Promoção</span>
+                            }
+                            else if (p.EmDestaque)
+                            {
+                                <span class="av-etiqueta">Destaque</span>
+                            }
+                        </div>
+
+                        <div class="av-cartao-corpo">
+                            <div class="av-cartao-local">@p.Destino, @p.Pais</div>
+                            <h3>@p.Nome</h3>
+                            <p class="av-cartao-desc">@p.Descricao</p>
+
+                            <div class="av-cartao-meta">
+                                <span>@dias dias</span>
+                                <span>Parte a @p.DataPartida.ToString("dd MMM")</span>
+                                <span>@p.Categoria</span>
+                            </div>
+
+                            <div class="av-cartao-rodape">
+                                <div>
+                                    <div class="av-preco">
+                                        @preco.ToString("C0")
+                                        <small>/pessoa</small>
+                                    </div>
+                                    <div class="av-vagas @(vagas <= 3 ? "av-vagas-poucas" : "")">
+                                        @(vagas <= 3 ? $"Só {vagas} lugares" : $"{vagas} lugares")
+                                    </div>
+                                </div>
+                                <a class="btn-av btn-av-azul"
+                                   asp-controller="Pacotes" asp-action="Detalhe" asp-route-id="@p.Id">
+                                    Ver viagem
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="av-vazio">
+                <h3>Ainda não há viagens em destaque</h3>
+                <p>Assim que houver partidas confirmadas, aparecem aqui.</p>
+                <a class="btn-av btn-av-azul" asp-controller="Pacotes" asp-action="Index">Ver todos os pacotes</a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="av-faixa">
+    <div class="container-av av-faixa-grelha">
+        <div class="av-faixa-item">
+            <h4>Itinerário dia a dia</h4>
+            <p>Sabe o que vai fazer em cada dia antes de reservar. Sem surpresas à chegada.</p>
+        </div>
+        <div class="av-faixa-item">
+            <h4>Cancelamento até 30 dias</h4>
+            <p>Devolvemos a totalidade. Entre 30 e 7 dias, devolvemos parte.</p>
+        </div>
+        <div class="av-faixa-item">
+            <h4>Pagamento faseado</h4>
+            <p>Reserve com um sinal e pague o resto até à data de partida.</p>
+        </div>
+        <div class="av-faixa-item">
+            <h4>Alguém do lado de cá</h4>
+            <p>Um contacto direto durante a viagem, não um formulário.</p>
+        </div>
+    </div>
+</section>

@@ -11,6 +11,7 @@ namespace AgenciaViagens.Domain.Entities
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
+        public string Origem { get; set; } = "Lisboa";
         public string Destino { get; set; } = string.Empty;
         public string Pais { get; set; } = string.Empty;
         public string Categoria { get; set; } = string.Empty; // praia, cultura, aventura

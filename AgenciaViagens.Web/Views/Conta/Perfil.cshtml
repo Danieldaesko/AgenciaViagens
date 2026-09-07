@@ -1,0 +1,39 @@
+﻿@model AgenciaViagens.Infrastructure.Identity.ApplicationUser
+
+
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>@Model.Nome</h1>
+        <p>@Model.Email</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av" style="max-width:700px">
+        <dl class="av-detalhe-factos">
+            <div class="av-facto">
+                <dt>Nome</dt>
+                <dd style="font-size:.95rem">@Model.Nome</dd>
+            </div>
+            <div class="av-facto">
+                <dt>NIF</dt>
+                <dd style="font-size:.95rem">@(Model.NIF ?? "—")</dd>
+            </div>
+            <div class="av-facto">
+                <dt>Telemóvel</dt>
+                <dd style="font-size:.95rem">@(Model.PhoneNumber ?? "—")</dd>
+            </div>
+            <div class="av-facto">
+                <dt>Pontos</dt>
+                <dd>@Model.Pontos</dd>
+            </div>
+        </dl>
+
+        <div style="margin-top:28px">
+            <a class="btn-av btn-av-azul" asp-controller="Reservas" asp-action="Minhas">
+                Ver as minhas reservas
+            </a>
+        </div>
+    </div>  
+</section> 

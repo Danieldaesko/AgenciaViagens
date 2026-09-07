@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:AgenciaViagens.Mobile.Models"
+             x:Class="AgenciaViagens.Mobile.Pages.PacotesPage"
+             Title="Pacotes"
+             BackgroundColor="{StaticResource Pedra}">
+
+    <Grid RowDefinitions="Auto,*" Padding="16,12">
+
+        <Border Grid.Row="0" Stroke="{StaticResource Linha}" StrokeThickness="1"
+                BackgroundColor="White" Padding="12,0" Margin="0,0,0,12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="24" />
+            </Border.StrokeShape>
+            <Entry Text="{Binding TermoPesquisa}"
+                   Placeholder="Procurar destino ou país"
+                   Style="{StaticResource CampoEntrada}" />
+        </Border>
+
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding Ocupado}"
+                     Command="{Binding CarregarCommand}">
+            <CollectionView ItemsSource="{Binding Pacotes}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" Spacing="8" VerticalOptions="Center">
+                        <Label Text="Nada encontrado"
+                               FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource Violeta}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Experimente outro destino."
+                               FontSize="13" TextColor="{StaticResource Cinza}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:PacoteModel">
+                        <Border BackgroundColor="White" StrokeThickness="0"
+                                Margin="0,0,0,12" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AbrirPacoteCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="{Binding Percurso}" FontSize="11"
+                                       TextColor="{StaticResource Cinza}" />
+                                <Label Text="{Binding Nome}" FontSize="16"
+                                       FontAttributes="Bold" TextColor="{StaticResource Carvao}" />
+                                <Label Text="{Binding Descricao}" FontSize="13"
+                                       MaxLines="2" LineBreakMode="TailTruncation"
+                                       TextColor="{StaticResource Cinza}" />
+
+                                <BoxView HeightRequest="1" Color="{StaticResource Linha}" Margin="0,6" />
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding PrecoFormatado}"
+                                               FontSize="21" FontAttributes="Bold"
+                                               TextColor="{StaticResource Violeta}" />
+                                        <Label Text="{Binding TextoVagas}" FontSize="11"
+                                               TextColor="{StaticResource Cinza}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding ResumoDatas}"
+                                           FontSize="12" TextColor="{StaticResource Cinza}"
+                                           VerticalOptions="End" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>
