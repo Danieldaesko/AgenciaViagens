@@ -111,7 +111,7 @@ public class ApiService
     public async Task<List<ReservaModel>> ObterMinhasReservasAsync()
     {
         await PrepararAuthAsync();
-        var resposta = await _http.GetAsync("reserva");
+        var resposta = await _http.GetAsync("reserva/minhas");
         if (!resposta.IsSuccessStatusCode) return new();
         return await resposta.Content.ReadFromJsonAsync<List<ReservaModel>>(JsonOpts) ?? new();
     }

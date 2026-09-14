@@ -33,5 +33,36 @@ namespace AgenciaViagens.Application.Services
             await _context.Avaliacoes.AddAsync(avaliacao);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Avaliacao>> ObterPendentesAsync()
+        {
+            return await _context.Avaliacoes
+                .Include(a => a.Pacote)
+                .Where(a => !a.Aprovada)
+                .OrderByDescending(a => a.Data)
+                .ToListAsync();
+        }
+
+        public async Task<(bool Sucesso, string? Erro)> AprovarAsync(int id)
+        {
+            var avaliacao = await _context.Avaliacoes.FindAsync(id);
+            if (avaliacao is null)
+                return (false, "Avaliação não encontrada.");
+
+            avaliacao.Aprovada = true;
+            await _context.SaveChangesAsync();
+            return (true, null);
+        }
+
+        public async Task<(bool Sucesso, string? Erro)> RejeitarAsync(int id)
+        {
+            var avaliacao = await _context.Avaliacoes.FindAsync(id);
+            if (avaliacao is null)
+                return (false, "Avaliação não encontrada.");
+
+            _context.Avaliacoes.Remove(avaliacao);
+            await _context.SaveChangesAsync();
+            return (true, null);
+        }
     }
 }

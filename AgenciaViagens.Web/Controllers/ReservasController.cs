@@ -1,6 +1,7 @@
 ﻿using AgenciaViagens.Application.Services;
 using AgenciaViagens.Domain.Entities;
 using AgenciaViagens.Infrastructure.Identity;
+using AgenciaViagens.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +14,18 @@ namespace AgenciaViagens.Web.Controllers
     {
         private readonly ReservaService _reservaService;
         private readonly PacoteService _pacoteService;
+        private readonly PdfService _pdfService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ReservasController(
             ReservaService reservaService,
             PacoteService pacoteService,
+            PdfService pdfService,
             UserManager<ApplicationUser> userManager)
         {
             _reservaService = reservaService;
             _pacoteService = pacoteService;
+            _pdfService = pdfService;
             _userManager = userManager;
         }
 
@@ -193,6 +197,20 @@ namespace AgenciaViagens.Web.Controllers
 
             ViewData["Title"] = $"Reserva {reserva.Id}";
             return View(reserva);
+        }
+
+        // ── Voucher em PDF ────────────────────────────────
+
+        public async Task<IActionResult> Voucher(int id)
+        {
+            var utilizador = await _userManager.GetUserAsync(User);
+            if (utilizador is null) return Challenge();
+
+            var reserva = await _reservaService.ObterDoUtilizadorAsync(id, utilizador.Id);
+            if (reserva is null) return NotFound();
+
+            var pdf = _pdfService.GerarVoucher(reserva, utilizador.Nome, utilizador.Email ?? "");
+            return File(pdf, "application/pdf", $"voucher-{reserva.Id:D5}.pdf");
         }
 
         [HttpPost]

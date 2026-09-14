@@ -90,7 +90,12 @@
                                 </div>
                                 <div class="av-campo-form">
                                     <label>Nacionalidade</label>
-                                    <input name="Nacionalidade" placeholder="Portuguesa" />
+                                    <select name="Nacionalidade">
+                                        @foreach (var n in AgenciaViagens.Domain.Entities.Nacionalidades.Todas)
+                                        {
+                                            <option value="@n" selected="@(n == "Portuguesa")">@n</option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
 

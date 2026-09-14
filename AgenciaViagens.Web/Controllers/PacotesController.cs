@@ -1,5 +1,6 @@
 ﻿using AgenciaViagens.Application.DTOs;
 using AgenciaViagens.Application.Services;
+using AgenciaViagens.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgenciaViagens.Web.Controllers
@@ -7,10 +8,12 @@ namespace AgenciaViagens.Web.Controllers
     public class PacotesController : Controller
     {
         private readonly PacoteService _pacoteService;
+        private readonly PdfService _pdfService;
 
-        public PacotesController(PacoteService pacoteService)
+        public PacotesController(PacoteService pacoteService, PdfService pdfService)
         {
             _pacoteService = pacoteService;
+            _pdfService = pdfService;
         }
 
         public async Task<IActionResult> Index([FromQuery] FiltroPacotesDTO filtro)
@@ -38,6 +41,19 @@ namespace AgenciaViagens.Web.Controllers
 
             ViewData["Title"] = pacote.Nome;
             return View(pacote);
+        }
+
+        // ── Itinerário em PDF ─────────────────────────────
+
+        public async Task<IActionResult> Itinerario(int id)
+        {
+            var pacote = await _pacoteService.ObterPorIdAsync(id);
+            if (pacote is null) return NotFound();
+
+            var pdf = _pdfService.GerarItinerario(pacote);
+            var nome = pacote.Destino.ToLower().Replace(" ", "-");
+
+            return File(pdf, "application/pdf", $"itinerario-{nome}.pdf");
         }
     }
 }

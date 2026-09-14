@@ -121,6 +121,11 @@
                asp-controller="Reservas" asp-action="Nova" asp-route-pacoteId="@Model.Id">
                 Reservar esta viagem
             </a>
+            <a class="btn-av btn-av-linha" style="margin-top:10px"
+               asp-action="Itinerario" asp-route-id="@Model.Id" target="_blank">
+                Itinerário em PDF
+            </a>
+
             <p class="av-painel-nota">
                 Não é cobrado nada agora. Cancelamento com devolução total até 30 dias antes da partida.
             </p>

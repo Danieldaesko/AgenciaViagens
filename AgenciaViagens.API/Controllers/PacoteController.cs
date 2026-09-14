@@ -1,10 +1,11 @@
 ﻿using AgenciaViagens.Application.DTOs;
 using AgenciaViagens.Application.Services;
 using AgenciaViagens.Domain.Entities;
+using AgenciaViagens.Infrastructure.Identity;
+using AgenciaViagens.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using AgenciaViagens.Infrastructure.Identity;
 
 namespace AgenciaViagens.API.Controllers
 {
@@ -14,14 +15,20 @@ namespace AgenciaViagens.API.Controllers
     public class PacoteController : ControllerBase
     {
         private readonly PacoteService _pacoteService;
+        private readonly PdfService _pdfService;
 
-        public PacoteController(PacoteService pacoteService)
+        private readonly XmlExportService _xmlService;
+        public PacoteController(
+           PacoteService pacoteService,
+           PdfService pdfService,
+           XmlExportService xmlService)
         {
             _pacoteService = pacoteService;
+            _pdfService = pdfService;
+            _xmlService = xmlService;
         }
-
         [HttpGet]
-        [AllowAnonymous]                                                
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Pacote>>> ObterTodos()
         {
             var pacotes = await _pacoteService.ObterTodosAsync();
@@ -29,7 +36,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [AllowAnonymous]                                               
+        [AllowAnonymous]
         public async Task<ActionResult<Pacote>> ObterPorId(int id)
         {
             var pacote = await _pacoteService.ObterPorIdAsync(id);
@@ -38,7 +45,7 @@ namespace AgenciaViagens.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = $"{Roles.Admin},{Roles.Colaborador}")]        
+        [Authorize(Roles = $"{Roles.Admin},{Roles.Colaborador}")]
         public async Task<ActionResult<Pacote>> Criar([FromBody] CriarPacoteDTO dto)
         {
             if (dto.DataRegresso <= dto.DataPartida)
@@ -64,12 +71,8 @@ namespace AgenciaViagens.API.Controllers
                 Ativo = true
             };
 
-
-
             await _pacoteService.AdicionarAsync(pacote);
             return CreatedAtAction(nameof(ObterPorId), new { id = pacote.Id }, pacote);
-       
-           
         }
 
         [HttpGet("pesquisar")]
@@ -115,5 +118,32 @@ namespace AgenciaViagens.API.Controllers
             return Ok(destinos);
         }
 
+        /// <summary>Itinerário do pacote em PDF.</summary>
+        [HttpGet("{id}/itinerario-pdf")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DescarregarItinerario(int id)
+        {
+            var pacote = await _pacoteService.ObterPorIdAsync(id);
+            if (pacote is null)
+                return NotFound(new { erro = "Pacote não encontrado." });
+
+            var pdf = _pdfService.GerarItinerario(pacote);
+            var nome = pacote.Destino.ToLower().Replace(" ", "-");
+
+            return File(pdf, "application/pdf", $"itinerario-{nome}.pdf");
+        }
+
+
+        /// <summary>Exporta os pacotes em XML. Só staff.</summary>
+        [HttpGet("exportar-xml")]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.Colaborador}")]
+        public async Task<IActionResult> ExportarXml()
+        {
+            var pacotes = await _pacoteService.ObterTodosParaGestaoAsync();
+            var xml = _xmlService.ExportarPacotes(pacotes);
+
+            return File(xml, "application/xml",
+                $"pacotes-{DateTime.Now:yyyy-MM-dd}.xml");
+        }
     }
 }

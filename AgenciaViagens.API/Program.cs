@@ -1,12 +1,14 @@
 using AgenciaViagens.Application.Services;
 using AgenciaViagens.Infrastructure.Data;
 using AgenciaViagens.Infrastructure.Identity;
+using AgenciaViagens.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,7 +60,8 @@ builder.Services.AddScoped<AvaliacaoService>();
 builder.Services.AddScoped<ItinerarioService>();
 builder.Services.AddScoped<PagamentoService>();
 builder.Services.AddScoped<FaturaService>();
-
+builder.Services.AddScoped<PdfService>();
+builder.Services.AddScoped<XmlExportService>();
 // 3. Adicionar CORS (Essencial para permitir pedidos do .NET MAUI e Web)
 builder.Services.AddCors(options =>
 {

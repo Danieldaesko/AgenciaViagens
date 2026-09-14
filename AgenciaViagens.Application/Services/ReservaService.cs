@@ -101,10 +101,16 @@ namespace AgenciaViagens.Application.Services
         {
             return await _context.Reservas
                 .Include(r => r.Pacote)
-                    .ThenInclude(p => p.Itinerarios)
+                .ThenInclude(p => p.Itinerarios)
                 .Include(r => r.Participantes)
                 .Include(r => r.Pagamentos)
                 .FirstOrDefaultAsync(r => r.Id == reservaId && r.UtilizadorId == utilizadorId);
+        }
+
+                public async Task<bool> PertenceAoUtilizadorAsync(int reservaId, int utilizadorId)
+        {
+            return await _context.Reservas
+                .AnyAsync(r => r.Id == reservaId && r.UtilizadorId == utilizadorId);
         }
 
         // ══ PARTICIPANTES ════════════════════════════════════
@@ -233,6 +239,16 @@ namespace AgenciaViagens.Application.Services
 
             await _context.SaveChangesAsync();
             return (true, null, reembolso);
+        }
+
+        public async Task<List<Reserva>> ObterTodasComDetalhesAsync()
+        {
+            return await _context.Reservas
+                .Include(r => r.Pacote)
+                .Include(r => r.Participantes)
+                .Include(r => r.Pagamentos)
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
         }
     }
 }

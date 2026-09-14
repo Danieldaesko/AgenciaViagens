@@ -1,8 +1,10 @@
 using AgenciaViagens.Application.Services;
 using AgenciaViagens.Infrastructure.Data;
 using AgenciaViagens.Infrastructure.Identity;
+using AgenciaViagens.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +42,10 @@ builder.Services.AddScoped<ItinerarioService>();
 builder.Services.AddScoped<AvaliacaoService>();
 builder.Services.AddScoped<PagamentoService>();
 builder.Services.AddScoped<FaturaService>();
-
+builder.Services.AddScoped<EstatisticasService>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<PdfService>();
+builder.Services.AddScoped<XmlExportService>();
 
 var app = builder.Build();
 

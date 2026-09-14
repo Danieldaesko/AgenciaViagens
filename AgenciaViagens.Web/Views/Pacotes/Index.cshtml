@@ -21,14 +21,19 @@
 
                 <div class="av-filtro-grupo">
                     <label for="destino">Destino</label>
-                    <input type="text" id="destino" name="destino" value="@f.Destino"
-                           list="destinos" placeholder="Qualquer" />
-                    <datalist id="destinos">
+                    <select id="destino" name="destino">
+                        <option value="">Qualquer</option>
                         @foreach (var d in destinos)
                         {
-                            <option value="@d"></option>
+                            <option value="@d" selected="@(f.Destino == d)">@d</option>
                         }
-                    </datalist>
+                    </select>
+                </div>
+
+                <div class="av-filtro-grupo">
+                    <label for="dataDe">Partir por volta de</label>
+                    <input type="date" id="dataDe" name="dataPartidaDe"
+                           value="@(f.DataPartidaDe?.ToString("yyyy-MM-dd"))" />
                 </div>
 
                 <div class="av-filtro-grupo">
@@ -181,7 +186,10 @@
             {
                 <div class="av-vazio">
                     <h3>Nada corresponde a esta pesquisa</h3>
-                    <p>Experimente alargar o intervalo de datas ou aumentar o preço máximo.</p>
+                    <p>
+                        Não há partidas nesse período. As nossas próximas saídas são em outubro,
+                        novembro e dezembro de 2026, e janeiro de 2027.
+                    </p>
                     <a class="btn-av btn-av-azul" asp-action="Index">Ver todas as viagens</a>
                 </div>
             }

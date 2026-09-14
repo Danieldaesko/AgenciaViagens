@@ -1,8 +1,11 @@
-﻿using AgenciaViagens.Application.DTOs;
+﻿using AgenciaViagens.API.Extensions;
+using AgenciaViagens.Application.DTOs;
 using AgenciaViagens.Application.Services;
 using AgenciaViagens.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+
 
 namespace AgenciaViagens.API.Controllers
 {
@@ -43,7 +46,7 @@ namespace AgenciaViagens.API.Controllers
 
             var avaliacao = new Avaliacao
             {
-                UtilizadorId = dto.UtilizadorId,
+                UtilizadorId = User.ObterUtilizadorId(),
                 PacoteId = dto.PacoteId,
                 Classificacao = dto.Classificacao,
                 Comentario = dto.Comentario,

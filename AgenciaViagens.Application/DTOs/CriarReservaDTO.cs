@@ -10,7 +10,7 @@ namespace AgenciaViagens.Application.DTOs;
 
 public class CriarReservaDTO
 {
-    public int UtilizadorId { get; set; }
+   
     public int PacoteId { get; set; }
     public int NumParticipantes { get; set; }
     public decimal PrecoTotal { get; set; }

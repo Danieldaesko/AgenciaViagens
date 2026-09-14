@@ -30,20 +30,21 @@
 
             <div class="av-campo">
                 <label for="destino">Destino</label>
-                <input type="text" id="destino" name="destino" list="lista-destinos"
-                       placeholder="Cidade ou país" />
-                <datalist id="lista-destinos">
+                <select id="destino" name="destino">
+                    <option value="">Qualquer</option>
                     @foreach (var d in (List<string>)(ViewBag.Destinos ?? new List<string>()))
                     {
-                        <option value="@d"></option>
+                        <option value="@d">@d</option>
                     }
-                </datalist>
+                </select>
             </div>
 
             <div class="av-campo">
                 <label for="dataDe">Data de partida</label>
                 <input type="date" id="dataDe" name="dataPartidaDe" />
             </div>
+
+
 
             <div class="av-campo">
                 <label for="viajantes">Viajantes</label>

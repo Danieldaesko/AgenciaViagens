@@ -6,8 +6,6 @@
   <Project Path="AgenciaViagens.Application/AgenciaViagens.Application.csproj" />
   <Project Path="AgenciaViagens.Domain/AgenciaViagens.Domain.csproj" />
   <Project Path="AgenciaViagens.Infrastructure/AgenciaViagens.Infrastructure.csproj" />
-  <Project Path="AgenciaViagens.Mobile/AgenciaViagens.Mobile.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
+  <Project Path="AgenciaViagens.Mobile/AgenciaViagens.Mobile.csproj" />
   <Project Path="AgenciaViagens.Web/AgenciaViagens.Web.csproj" />
 </Solution>

@@ -65,7 +65,12 @@ namespace AgenciaViagens.Application.Services
                 query = query.Where(p => (p.PrecoPromocao ?? p.PrecoBase) <= filtro.PrecoMax.Value);
 
             if (filtro.DataPartidaDe.HasValue)
-                query = query.Where(p => p.DataPartida >= filtro.DataPartidaDe.Value);
+            {
+                // Mostra partidas desde a data escolhida até 30 dias depois
+                var de = filtro.DataPartidaDe.Value.Date;
+                var ate = de.AddDays(30);
+                query = query.Where(p => p.DataPartida >= de && p.DataPartida <= ate);
+            }
 
             if (filtro.DataPartidaAte.HasValue)
                 query = query.Where(p => p.DataPartida <= filtro.DataPartidaAte.Value);
@@ -152,5 +157,57 @@ namespace AgenciaViagens.Application.Services
                 .OrderBy(o => o)
                 .ToListAsync();
         }
+
+        // ══ GESTÃO (BACKOFFICE) ══════════════════════════════
+
+        public async Task<List<Pacote>> ObterTodosParaGestaoAsync()
+        {
+            return await _context.Pacotes
+                .OrderByDescending(p => p.DataCriacao)
+                .ToListAsync();
+        }
+
+        public async Task<(bool Sucesso, string? Erro)> AtualizarAsync(Pacote pacote)
+        {
+            var existente = await _context.Pacotes.FindAsync(pacote.Id);
+            if (existente is null)
+                return (false, "Pacote não encontrado.");
+
+            if (pacote.VagasTotal < existente.VagasOcupadas)
+                return (false, $"Já há {existente.VagasOcupadas} lugares ocupados. Não pode reduzir abaixo disso.");
+
+            existente.Nome = pacote.Nome;
+            existente.Descricao = pacote.Descricao;
+            existente.Origem = pacote.Origem;
+            existente.Destino = pacote.Destino;
+            existente.Pais = pacote.Pais;
+            existente.Categoria = pacote.Categoria;
+            existente.PrecoBase = pacote.PrecoBase;
+            existente.PrecoPromocao = pacote.PrecoPromocao;
+            existente.DataPartida = pacote.DataPartida;
+            existente.DataRegresso = pacote.DataRegresso;
+            existente.VagasTotal = pacote.VagasTotal;
+            existente.ImagemUrl = pacote.ImagemUrl;
+            existente.EmDestaque = pacote.EmDestaque;
+            existente.EmPromocao = pacote.EmPromocao;
+
+            await _context.SaveChangesAsync();
+            return (true, null);
+        }
+
+        public async Task<(bool Sucesso, string? Erro)> AlternarAtivoAsync(int id)
+        {
+            var pacote = await _context.Pacotes.FindAsync(id);
+            if (pacote is null)
+                return (false, "Pacote não encontrado.");
+
+            if (pacote.Ativo && pacote.VagasOcupadas > 0)
+                return (false, "Não pode desativar um pacote com reservas confirmadas.");
+
+            pacote.Ativo = !pacote.Ativo;
+            await _context.SaveChangesAsync();
+            return (true, null);
+        }
     }
 }
+
