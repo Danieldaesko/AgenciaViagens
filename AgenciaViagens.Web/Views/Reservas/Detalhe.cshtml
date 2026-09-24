@@ -3,6 +3,12 @@
     var dias = (Model.Pacote.DataRegresso - Model.Pacote.DataPartida).Days;
     var podeCancelar = Model.Estado is "Pendente" or "Confirmada";
     var diasAte = (Model.Pacote.DataPartida - DateTime.UtcNow).Days;
+
+    var pago = Model.Pagamentos.Where(p => p.Estado == "Pago").Sum(p => p.Valor);
+    var pendente = Model.Pagamentos.Where(p => p.Estado == "Pendente").Sum(p => p.Valor);
+    var emFalta = Model.PrecoTotal - pago - pendente;
+    var podePagar = Model.Estado == "Confirmada" && emFalta > 0;
+    var fatura = Model.Faturas.FirstOrDefault(f => !f.Anulada);
 }
 
 <section class="av-cabecalho">
@@ -22,6 +28,14 @@
         @if (TempData["Erro"] != null)
         {
             <div class="av-aviso av-aviso-erro">@TempData["Erro"]</div>
+        }
+
+        @if (Model.Estado == "Pendente")
+        {
+            <div class="av-aviso av-aviso-info">
+                Esta reserva ainda não está confirmada.
+                <a asp-action="Participantes" asp-route-id="@Model.Id">Continuar a reserva</a>
+            </div>
         }
 
         <div class="av-reserva">
@@ -46,6 +60,34 @@
                         <div class="av-linha-detalhe destaque"><span>Total</span><span>@Model.PrecoTotal.ToString("C")</span></div>
                     </div>
                 </div>
+
+                @if (Model.Pagamentos.Any())
+                {
+                    <div class="av-caixa">
+                        <h2>Pagamentos</h2>
+                        @foreach (var pg in Model.Pagamentos.OrderBy(p => p.Data))
+                        {
+                            <div class="av-participante">
+                                <div>
+                                    <div class="av-participante-nome">@pg.Valor.ToString("C")</div>
+                                    <div class="av-participante-doc">
+                                        @pg.Metodo · @pg.Data.ToLocalTime().ToString("dd/MM/yyyy")
+                                        @(pg.Referencia is null ? "" : $"· {pg.Referencia}")
+                                    </div>
+                                </div>
+                                <span class="av-estado @(pg.Estado == "Pago" ? "av-estado-confirmada" : "av-estado-pendente")">
+                                    @(pg.Estado == "Pago" ? "Pago" : "A aguardar")
+                                </span>
+                            </div>
+                        }
+                        @if (fatura is not null)
+                        {
+                            <p style="margin:12px 0 0;font-size:.88rem;color:var(--cinza)">
+                                Fatura emitida: <strong style="color:var(--carvao)">@fatura.Numero</strong>
+                            </p>
+                        }
+                    </div>
+                }
 
                 <div class="av-caixa">
                     <h2>Quem viaja</h2>
@@ -89,38 +131,62 @@
 
             <aside class="av-painel">
                 <div class="av-painel-linhas" style="margin-top:0">
-                    <div class="av-painel-linha"><span>Reservado em</span><span>@Model.DataReserva.ToString("dd/MM/yyyy")</span></div>
-                    <div class="av-painel-linha"><span>Pontos ganhos</span><span>+@Model.PontosGanhos</span></div>
-                    @if (Model.DataCancelamento.HasValue)
+                    <div class="av-painel-linha"><span>Total</span><span>@Model.PrecoTotal.ToString("C")</span></div>
+                    <div class="av-painel-linha"><span>Pago</span><span style="color:#1E7A3D">@pago.ToString("C")</span></div>
+                    @if (pendente > 0)
                     {
-                        <div class="av-painel-linha"><span>Cancelada em</span><span>@Model.DataCancelamento.Value.ToString("dd/MM/yyyy")</span></div>
+                        <div class="av-painel-linha"><span>A aguardar</span><span style="color:#9A6208">@pendente.ToString("C")</span></div>
                     }
+                    <div class="av-painel-linha"><span>Em falta</span><span>@emFalta.ToString("C")</span></div>
                 </div>
+
+                @if (podePagar)
+                {
+                    <a class="btn-av btn-av-ocre" style="margin-bottom:12px"
+                       asp-controller="Pagamentos" asp-action="Nova" asp-route-reservaId="@Model.Id">
+                        Pagar @(pago + pendente > 0 ? "o restante" : "")
+                    </a>
+                }
+
+                @if (Model.Estado is "Confirmada" or "Concluida")
+                {
+                    <a class="btn-av btn-av-azul" style="margin-bottom:12px"
+                       asp-action="Voucher" asp-route-id="@Model.Id" target="_blank">
+                        Descarregar voucher
+                    </a>
+                }
+
+                @if ((bool)(ViewBag.PodeAvaliar ?? false))
+                {
+                    <a class="btn-av btn-av-ocre" style="margin-bottom:12px"
+                       asp-controller="Avaliacoes" asp-action="Nova" asp-route-reservaId="@Model.Id">
+                        Avaliar esta viagem
+                    </a>
+                }
 
                 @if (podeCancelar)
                 {
-                    <p class="av-painel-nota" style="text-align:left;margin-bottom:14px">
+                    <p class="av-painel-nota" style="text-align:left;margin:4px 0 12px">
                         @if (diasAte >= 30)
                         {
                             <text>Cancelando agora, devolvemos a totalidade.</text>
                         }
                         else if (diasAte >= 15)
                         {
+
                             <text>Cancelando agora, devolvemos 75%.</text>
                         }
                         else if (diasAte >= 7)
                         {
+
                             <text>Cancelando agora, devolvemos 50%.</text>
                         }
                         else
                         {
-                            <text>Estamos a menos de 7 dias da partida — sem direito a reembolso.</text>
+
+                            <text>A menos de 7 dias da partida — sem direito a reembolso.</text>
                         }
                     </p>
-                    <a class="btn-av btn-av-azul" style="margin-bottom:12px"
-                       asp-action="Voucher" asp-route-id="@Model.Id" target="_blank">
-                        Descarregar voucher
-                    </a>
 
                     <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post"
                           onsubmit="return confirm('Quer mesmo cancelar esta reserva?');">
@@ -135,7 +201,7 @@
                     <div class="av-esgotado">Esta reserva está @Model.Estado.ToLower().</div>
                 }
 
-                <a class="btn-av btn-av-azul" style="margin-top:12px" asp-action="Minhas">
+                <a class="btn-av btn-av-linha" style="margin-top:12px" asp-action="Minhas">
                     Voltar às reservas
                 </a>
             </aside>

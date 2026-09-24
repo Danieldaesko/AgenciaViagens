@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using AgenciaViagens.Infrastructure.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var utilizadorAtual = await UserManager.GetUserAsync(User);
+    var accao = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · Backoffice</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/agenciaviagens.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="bo-corpo">
+
+        <aside class="bo-lado">
+            <div class="bo-marca">
+                <span class="bo-marca-nome">Agencia<span>Viagens</span></span>
+                <small>Backoffice</small>
+            </div>
+
+            <ul class="bo-menu">
+                <li><a asp-action="Index" class="@(accao == "Index" ? "ativo" : "")">Painel</a></li>
+                <li><a asp-action="Pacotes" class="@(accao is "Pacotes" or "NovoPacote" or "EditarPacote" ? "ativo" : "")">Pacotes</a></li>
+                <li><a asp-action="Reservas" class="@(accao is "Reservas" or "DetalheReserva" ? "ativo" : "")">Reservas</a></li>
+                <li><a asp-action="Avaliacoes" class="@(accao == "Avaliacoes" ? "ativo" : "")">Avaliações</a></li>
+            </ul>
+
+            <div class="bo-lado-fim">
+                <div style="color:rgba(255,255,255,.85);font-weight:600;margin-bottom:6px">
+                    @(utilizadorAtual?.Nome ?? "Colaborador")
+                </div>
+                <a asp-controller="Home" asp-action="Index">Ver o site</a>
+                <form asp-controller="Conta" asp-action="Logout" method="post">
+                    <button type="submit"
+                            style="background:none;border:none;padding:5px 0;color:rgba(255,255,255,.6);font-size:.82rem;cursor:pointer;font-family:var(--ff-corpo)">
+                        Terminar sessão
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="bo-principal">
+            @if (TempData["Sucesso"] != null)
+            {
+                <div class="av-aviso av-aviso-ok">@TempData["Sucesso"]</div>
+            }
+            @if (TempData["Erro"] != null)
+            {
+                <div class="av-aviso av-aviso-erro">@TempData["Erro"]</div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

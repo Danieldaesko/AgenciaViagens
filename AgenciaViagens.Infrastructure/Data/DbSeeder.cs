@@ -35,6 +35,25 @@ namespace AgenciaViagens.Infrastructure.Data
                 if (resultado.Succeeded)
                     await userManager.AddToRoleAsync(admin, Roles.Admin);
             }
+
+            const string staffEmail = "colaborador@agenciaviagens.pt";
+
+            if (await userManager.FindByEmailAsync(staffEmail) is null)
+            {
+                var staff = new ApplicationUser
+                {
+                    UserName = staffEmail,
+                    Email = staffEmail,
+                    Nome = "Colaborador Teste",
+                    EmailConfirmed = true,
+                    Ativo = true
+                };
+
+                var resultado = await userManager.CreateAsync(staff, "Staff@2026");
+
+                if (resultado.Succeeded)
+                    await userManager.AddToRoleAsync(staff, Roles.Colaborador);
+            }
         }
     }
 }

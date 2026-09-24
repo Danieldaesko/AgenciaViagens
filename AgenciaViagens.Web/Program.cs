@@ -20,7 +20,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -46,6 +46,8 @@ builder.Services.AddScoped<EstatisticasService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PdfService>();
 builder.Services.AddScoped<XmlExportService>();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 

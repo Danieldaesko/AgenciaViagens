@@ -38,6 +38,10 @@
                 @if (SignInManager.IsSignedIn(User))
                 {
                     var utilizadorAtual = await UserManager.GetUserAsync(User);
+                    @if (User.IsInRole("Admin") || User.IsInRole("Colaborador"))
+                    {
+                        <a asp-controller="Admin" asp-action="Index">Backoffice</a>
+                    }
 
                     <a asp-controller="Reservas" asp-action="Minhas">As minhas reservas</a>
                     <a asp-controller="Conta" asp-action="Perfil">@(utilizadorAtual?.Nome ?? "A minha conta")</a>

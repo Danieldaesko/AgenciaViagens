@@ -1,0 +1,165 @@
+﻿@model AgenciaViagens.Application.Services.ResumoDashboard
+@{
+    var mensal = (List<AgenciaViagens.Application.Services.PontoMensal>)ViewBag.Mensal;
+    var categorias = (List<AgenciaViagens.Application.Services.PontoCategoria>)ViewBag.Categorias;
+    var destinos = (List<AgenciaViagens.Application.Services.PontoDestino>)ViewBag.Destinos;
+}
+
+<div class="bo-topo">
+    <div>
+        <h1>Painel</h1>
+        <p>Resumo da atividade da agência.</p>
+    </div>
+</div>
+
+<div class="bo-metricas">
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Faturação</div>
+        <div class="bo-metrica-valor">@Model.Faturacao.ToString("C0")</div>
+        <div class="bo-metrica-nota">reservas confirmadas</div>
+    </div>
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Reservas confirmadas</div>
+        <div class="bo-metrica-valor">@Model.ReservasConfirmadas</div>
+        <div class="bo-metrica-nota">de @Model.TotalReservas no total</div>
+    </div>
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Pendentes</div>
+        <div class="bo-metrica-valor">@Model.ReservasPendentes</div>
+        <div class="bo-metrica-nota">à espera de confirmação</div>
+    </div>
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Ocupação</div>
+        <div class="bo-metrica-valor">@Model.TaxaOcupacao.ToString("0")%</div>
+        <div class="bo-metrica-nota">lugares vendidos</div>
+    </div>
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Valor médio</div>
+        <div class="bo-metrica-valor">@Model.TicketMedio.ToString("C0")</div>
+        <div class="bo-metrica-nota">por reserva</div>
+    </div>
+    <div class="bo-metrica">
+        <div class="bo-metrica-rotulo">Clientes</div>
+        <div class="bo-metrica-valor">@Model.Clientes</div>
+        <div class="bo-metrica-nota">@Model.PacotesAtivos pacotes ativos</div>
+    </div>
+</div>
+
+@if (Model.AvaliacoesPendentes > 0)
+{
+    <div class="av-aviso av-aviso-info">
+        Há @Model.AvaliacoesPendentes @(Model.AvaliacoesPendentes == 1 ? "avaliação" : "avaliações") à espera de revisão.
+        <a asp-action="Avaliacoes">Rever agora</a>
+    </div>
+}
+
+<div class="bo-grelha">
+    <div class="bo-painel">
+        <h2>Faturação por mês</h2>
+        <p>Últimos 6 meses, reservas confirmadas.</p>
+        <div style="height:260px"><canvas id="graficoMensal"></canvas></div>
+    </div>
+
+    <div class="bo-painel">
+        <h2>Reservas por tipo</h2>
+        <p>Distribuição por categoria.</p>
+        @if (categorias.Any())
+        {
+            <div style="height:260px"><canvas id="graficoCategorias"></canvas></div>
+        }
+        else
+        {
+            <div class="bo-vazio">Ainda sem reservas confirmadas.</div>
+        }
+    </div>
+</div>
+
+<div class="bo-painel">
+    <h2>Destinos mais procurados</h2>
+    <p>Por número de viajantes.</p>
+
+    @if (destinos.Any())
+    {
+        <table class="bo-tabela">
+            <thead>
+                <tr>
+                    <th>Destino</th>
+                    <th class="num">Viajantes</th>
+                    <th class="num">Faturação</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in destinos)
+                {
+                    <tr>
+                        <td><strong>@d.Destino</strong></td>
+                        <td class="num">@d.Viajantes</td>
+                        <td class="num">@d.Faturacao.ToString("C0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="bo-vazio">Ainda sem reservas confirmadas.</div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.font.family = "'Public Sans', system-ui, sans-serif";
+        Chart.defaults.color = '#6E6873';
+
+        const euros = v => new Intl.NumberFormat('pt-PT', {
+            style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+        }).format(v);
+
+        new Chart(document.getElementById('graficoMensal'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(mensal.Select(m => m.Etiqueta))),
+                datasets: [{
+                    label: 'Faturação',
+                    data: @Html.Raw(Json.Serialize(mensal.Select(m => m.Valor))),
+                    backgroundColor: '#7B2D8E',
+                    hoverBackgroundColor: '#F58220',
+                    borderRadius: 6,
+                    maxBarThickness: 46
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: c => euros(c.parsed.y) } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: euros }, grid: { color: '#EFEDF1' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const elCat = document.getElementById('graficoCategorias');
+        if (elCat) {
+            new Chart(elCat, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(categorias.Select(c => c.Categoria))),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(categorias.Select(c => c.Reservas))),
+                        backgroundColor: ['#7B2D8E', '#F58220', '#5C1F6B', '#E0B04A', '#B98BC6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } } }
+                }
+            });
+        }
+    </script>
+}

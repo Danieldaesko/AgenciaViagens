@@ -1,0 +1,66 @@
+﻿@model List<AgenciaViagens.Domain.Entities.Reserva>
+@{
+    var filtro = ViewBag.EstadoFiltro as string;
+    var estados = new[] { "Pendente", "Confirmada", "Cancelada", "Concluida" };
+}
+
+<div class="bo-topo">
+    <div>
+        <h1>Reservas</h1>
+        <p>@Model.Count @(Model.Count == 1 ? "reserva" : "reservas")@(filtro is null ? "" : $" · {filtro.ToLower()}s")</p>
+    </div>
+</div>
+
+<nav class="bo-filtros">
+    <a class="bo-filtro @(filtro is null ? "ativo" : "")" asp-action="Reservas">Todas</a>
+    @foreach (var e in estados)
+    {
+        <a class="bo-filtro @(filtro == e ? "ativo" : "")" asp-action="Reservas" asp-route-estado="@e">@e</a>
+    }
+</nav>
+
+<div class="bo-painel">
+    @if (Model.Any())
+    {
+        <table class="bo-tabela">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Viagem</th>
+                    <th>Reservada</th>
+                    <th class="num">Viajantes</th>
+                    <th class="num">Total</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>#@r.Id.ToString("D5")</td>
+                        <td>
+                            <strong>@r.Pacote.Nome</strong>
+                            <div style="font-size:.8rem;color:var(--cinza)">
+                                @r.Pacote.Origem → @r.Pacote.Destino · @r.Pacote.DataPartida.ToString("dd/MM/yyyy")
+                            </div>
+                        </td>
+                        <td>@r.DataReserva.ToString("dd/MM/yyyy")</td>
+                        <td class="num">@r.NumParticipantes</td>
+                        <td class="num">@r.PrecoTotal.ToString("C0")</td>
+                        <td><span class="av-estado av-estado-@r.Estado.ToLower()">@r.Estado</span></td>
+                        <td>
+                            <div class="bo-acoes">
+                                <a class="bo-btn" asp-action="DetalheReserva" asp-route-id="@r.Id">Ver</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="bo-vazio">Não há reservas com este estado.</div>
+    }
+</div>

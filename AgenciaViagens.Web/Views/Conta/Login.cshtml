@@ -5,8 +5,21 @@
         <h1>Entrar</h1>
         <p>Aceda às suas reservas e itinerários.</p>
 
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="av-aviso av-aviso-ok">@TempData["Sucesso"]</div>
+        }
+
         <form asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
             <div asp-validation-summary="ModelOnly" class="av-erro-caixa"></div>
+
+            @if (ViewBag.EmailPorConfirmar != null)
+            {
+                <form asp-action="ReenviarAtivacao" method="post" style="margin-bottom:16px">
+                    <input type="hidden" name="email" value="@ViewBag.EmailPorConfirmar" />
+                    <button type="submit" class="btn-av btn-av-linha" style="width:100%">Reenviar link de ativação</button>
+                </form>
+            }
 
             <div class="av-campo-form">
                 <label asp-for="Email"></label>
@@ -29,11 +42,12 @@
         </form>
 
         <div class="av-form-rodape">
-            Ainda não tem conta? <a asp-action="Registo">Criar conta</a>
+            <a asp-action="RecuperarPassword">Esqueci-me da palavra-passe</a><br />
+            <span style="display:inline-block;margin-top:10px">Ainda não tem conta? <a asp-action="Registo">Criar conta</a></span>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />    
+    <partial name="_ValidationScriptsPartial" />
 }

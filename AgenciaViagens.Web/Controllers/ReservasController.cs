@@ -15,17 +15,20 @@ namespace AgenciaViagens.Web.Controllers
         private readonly ReservaService _reservaService;
         private readonly PacoteService _pacoteService;
         private readonly PdfService _pdfService;
+        private readonly AvaliacaoService _avaliacaoService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ReservasController(
             ReservaService reservaService,
             PacoteService pacoteService,
             PdfService pdfService,
+            AvaliacaoService avaliacaoService,
             UserManager<ApplicationUser> userManager)
         {
             _reservaService = reservaService;
             _pacoteService = pacoteService;
             _pdfService = pdfService;
+            _avaliacaoService = avaliacaoService;
             _userManager = userManager;
         }
 
@@ -155,7 +158,7 @@ namespace AgenciaViagens.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Confirmar")]
-        public async Task<IActionResult> ConfirmarPost(int id)
+        public async Task<IActionResult> ConfirmarPost(int id, [FromServices] EmailService email)
         {
             var utilizador = await _userManager.GetUserAsync(User);
             if (utilizador is null) return Challenge();
@@ -171,8 +174,13 @@ namespace AgenciaViagens.Web.Controllers
                 return RedirectToAction(nameof(Confirmar), new { id });
             }
 
-            TempData["Sucesso"] = "Reserva confirmada. Enviámos os detalhes para o seu email.";
-            return RedirectToAction(nameof(Detalhe), new { id });
+            // Volta a carregar para o voucher já sair com o estado "Confirmada"
+            var confirmada = await _reservaService.ObterDoUtilizadorAsync(id, utilizador.Id);
+            var voucher = _pdfService.GerarVoucher(confirmada!, utilizador.Nome, utilizador.Email ?? "");
+            await email.EnviarReservaConfirmadaAsync(utilizador.Email!, utilizador.Nome, confirmada!, voucher);
+
+            TempData["Sucesso"] = "Reserva confirmada. Enviámos o voucher para o seu email.";
+            return RedirectToAction("Nova", "Pagamentos", new { reservaId = id });
         }
 
         // ── Histórico ─────────────────────────────────────
@@ -194,6 +202,9 @@ namespace AgenciaViagens.Web.Controllers
 
             var reserva = await _reservaService.ObterDoUtilizadorAsync(id, utilizador.Id);
             if (reserva is null) return NotFound();
+
+            var (podeAvaliar, _) = await _avaliacaoService.PodeAvaliarAsync(id, utilizador.Id);
+            ViewBag.PodeAvaliar = podeAvaliar;
 
             ViewData["Title"] = $"Reserva {reserva.Id}";
             return View(reserva);

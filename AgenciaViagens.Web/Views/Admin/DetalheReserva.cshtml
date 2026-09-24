@@ -1,0 +1,120 @@
+﻿@model AgenciaViagens.Domain.Entities.Reserva
+@{
+    var pago = Model.Pagamentos.Where(p => p.Estado == "Pago").Sum(p => p.Valor);
+    var pendente = Model.Pagamentos.Where(p => p.Estado == "Pendente").Sum(p => p.Valor);
+    var emFalta = Model.PrecoTotal - pago;
+    var faturaEmitida = Model.Faturas.FirstOrDefault(f => !f.Anulada);
+}
+
+<div class="bo-topo">
+    <div>
+        <h1>Reserva #@Model.Id.ToString("D5")</h1>
+        <p>Feita a @Model.DataReserva.ToLocalTime().ToString("dd/MM/yyyy 'às' HH:mm")</p>
+    </div>
+    <span class="av-estado av-estado-@Model.Estado.ToLower()">@Model.Estado</span>
+</div>
+
+<div class="bo-grelha">
+    <div>
+        <div class="bo-painel" style="margin-bottom:20px">
+            <h2>Viagem</h2>
+            <p>@Model.Pacote.Nome</p>
+            <div class="av-linhas-detalhe">
+                <div class="av-linha-detalhe"><span>Percurso</span><span>@Model.Pacote.Origem → @Model.Pacote.Destino</span></div>
+                <div class="av-linha-detalhe"><span>Partida</span><span>@Model.Pacote.DataPartida.ToString("dd/MM/yyyy")</span></div>
+                <div class="av-linha-detalhe"><span>Regresso</span><span>@Model.Pacote.DataRegresso.ToString("dd/MM/yyyy")</span></div>
+                <div class="av-linha-detalhe"><span>Alojamento</span><span>@Model.OpcaoAlojamento</span></div>
+                <div class="av-linha-detalhe destaque"><span>Total</span><span>@Model.PrecoTotal.ToString("C")</span></div>
+            </div>
+        </div>
+
+        <div class="bo-painel">
+            <h2>Viajantes</h2>
+            <p>@Model.Participantes.Count de @Model.NumParticipantes registados</p>
+            @if (Model.Participantes.Any())
+            {
+                <table class="bo-tabela">
+                    <thead>
+                        <tr><th>Nome</th><th>Documento</th><th>Nacionalidade</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.Participantes)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@p.Nome</strong>
+                                    @if (p.ETitular)
+                                    {
+                                        <span class="av-etiqueta-titular" style="margin-left:6px">Titular</span>
+                                    }
+                                </td>
+                                <td>@p.TipoDocumento @p.Documento</td>
+                                <td>@(p.Nacionalidade ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="bo-painel">
+        <h2>Pagamentos</h2>
+        <p>
+            @pago.ToString("C") pagos
+            @if (pendente > 0)
+            {
+                <text>· @pendente.ToString("C") a aguardar</text>
+            }
+            · @emFalta.ToString("C") em falta
+        </p>
+
+        @if (Model.Pagamentos.Any())
+        {
+            @foreach (var pg in Model.Pagamentos.OrderBy(p => p.Data))
+            {
+                <div class="av-participante">
+                    <div>
+                        <div class="av-participante-nome">@pg.Valor.ToString("C")</div>
+                        <div class="av-participante-doc">
+                            @pg.Metodo · @pg.Data.ToLocalTime().ToString("dd/MM/yyyy")
+                            @(pg.Referencia is null ? "" : $"· {pg.Referencia}")
+                        </div>
+                    </div>
+                    @if (pg.Estado == "Pendente")
+                    {
+                        <form asp-controller="Pagamentos" asp-action="Confirmar" asp-route-id="@pg.Id" method="post"
+                              onsubmit="return confirm('Confirmar que este pagamento foi recebido?');">
+                            <button type="submit" class="bo-btn bo-btn-verde">Marcar como pago</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="av-estado av-estado-confirmada">@pg.Estado</span>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="bo-vazio" style="padding:20px">Sem pagamentos registados.</div>
+        }
+
+        @if (faturaEmitida is not null)
+        {
+            <p style="margin:14px 0 0;font-size:.88rem;color:var(--cinza)">
+                Fatura <strong style="color:var(--carvao)">@faturaEmitida.Numero</strong>
+                · @faturaEmitida.ValorTotal.ToString("C")
+                · emitida a @faturaEmitida.DataEmissao.ToLocalTime().ToString("dd/MM/yyyy")
+            </p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Observacoes))
+        {
+            <h2 style="margin-top:22px">Nota do cliente</h2>
+            <p style="color:var(--carvao)">@Model.Observacoes</p>
+        }
+    </div>
+</div>
+
+<a class="bo-btn" asp-action="Reservas">← Voltar às reservas</a>

@@ -1,0 +1,147 @@
+﻿@model AgenciaViagens.Domain.Entities.Pacote
+
+<div asp-validation-summary="ModelOnly" class="av-aviso av-aviso-erro"></div>
+<input type="hidden" asp-for="Id" />
+
+<div class="av-caixa">
+    <h2>A viagem</h2>
+
+    <div class="av-campo-form">
+        <label asp-for="Nome">Nome do pacote</label>
+        <input asp-for="Nome" placeholder="Ex: Descoberta de Roma" />
+        <span asp-validation-for="Nome" class="av-erro"></span>
+    </div>
+
+    <div class="av-campo-form">
+        <label asp-for="Descricao">Descrição</label>
+        <textarea asp-for="Descricao" rows="3"
+                  style="width:100%;padding:11px 13px;border:1px solid var(--linha);border-radius:6px;font-family:var(--ff-corpo);font-size:.95rem"></textarea>
+        <span asp-validation-for="Descricao" class="av-erro"></span>
+    </div>
+
+    <div class="av-campo-duplo">
+        <div class="av-campo-form">
+            <label asp-for="Origem">Partida de</label>
+            <select asp-for="Origem"
+                    style="width:100%;padding:11px 13px;border:1px solid var(--linha);border-radius:6px">
+                <option value="Lisboa">Lisboa</option>
+                <option value="Porto">Porto</option>
+                <option value="Faro">Faro</option>
+            </select>
+        </div>
+        <div class="av-campo-form">
+            <label asp-for="Categoria">Tipo de viagem</label>
+            <select asp-for="Categoria"
+                    style="width:100%;padding:11px 13px;border:1px solid var(--linha);border-radius:6px">
+                <option value="cultura">Cultura</option>
+                <option value="praia">Praia</option>
+                <option value="aventura">Aventura</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="av-campo-duplo">
+        <div class="av-campo-form">
+            <label asp-for="Destino">Destino</label>
+            <input asp-for="Destino" placeholder="Cidade" />
+            <span asp-validation-for="Destino" class="av-erro"></span>
+        </div>
+        <div class="av-campo-form">
+            <label asp-for="Pais">País</label>
+            <input asp-for="Pais" />
+            <span asp-validation-for="Pais" class="av-erro"></span>
+        </div>
+    </div>
+</div>
+
+<div class="av-caixa">
+    <h2>Datas e lugares</h2>
+
+    <div class="av-campo-duplo">
+        <div class="av-campo-form">
+            <label asp-for="DataPartida">Partida</label>
+            <input asp-for="DataPartida" type="date" asp-format="{0:yyyy-MM-dd}" />
+        </div>
+        <div class="av-campo-form">
+            <label asp-for="DataRegresso">Regresso</label>
+            <input asp-for="DataRegresso" type="date" asp-format="{0:yyyy-MM-dd}" />
+            <span asp-validation-for="DataRegresso" class="av-erro"></span>
+        </div>
+    </div>
+
+    <div class="av-campo-form" style="max-width:200px">
+        <label asp-for="VagasTotal">Lugares</label>
+        <input asp-for="VagasTotal" type="number" min="1" max="200" />
+    </div>
+</div>
+
+<div class="av-caixa">
+    <h2>Preço</h2>
+
+    <div class="av-campo-duplo">
+        <div class="av-campo-form">
+            <label asp-for="PrecoBase">Preço por pessoa (€)</label>
+            <input asp-for="PrecoBase" type="number" min="0" step="1" />
+        </div>
+        <div class="av-campo-form">
+            <label asp-for="PrecoPromocao">Preço em promoção (€)</label>
+            <input asp-for="PrecoPromocao" type="number" min="0" step="1" placeholder="Opcional" />
+        </div>
+    </div>
+
+    <label class="av-lembrar">
+        <input asp-for="EmDestaque" type="checkbox" /> Mostrar em destaque na página inicial
+    </label>
+    <label class="av-lembrar">
+        <input asp-for="EmPromocao" type="checkbox" /> Marcar como promoção
+    </label>
+</div>
+
+<div class="av-caixa">
+    <h2>Imagem</h2>
+    <p>JPG, PNG ou WEBP, até 5 MB. Uma foto horizontal fica melhor nos cartões.</p>
+
+    <input type="hidden" asp-for="ImagemUrl" />
+
+    <div class="bo-imagem-preview">
+        <img id="imgPreview"
+             src="@Model.ImagemUrl"
+             alt=""
+             style="@(string.IsNullOrEmpty(Model.ImagemUrl) ? "display:none" : "")" />
+        <span id="semImagem"
+              style="@(string.IsNullOrEmpty(Model.ImagemUrl) ? "" : "display:none")">
+            Ainda sem imagem
+        </span>
+    </div>
+
+    <label class="bo-upload">
+        <input type="file" name="imagem" accept=".jpg,.jpeg,.png,.webp"
+               onchange="mostrarPreview(this)" />
+        <span>@(string.IsNullOrEmpty(Model.ImagemUrl) ? "Escolher imagem" : "Trocar imagem")</span>
+    </label>
+    <span id="nomeFicheiro" style="font-size:.85rem;color:var(--cinza);margin-left:10px"></span>
+
+    <span asp-validation-for="ImagemUrl" class="av-erro"></span>
+    @if (ViewData.ModelState["imagem"]?.Errors.Count > 0)
+    {
+        <span class="av-erro">@ViewData.ModelState["imagem"]!.Errors[0].ErrorMessage</span>
+    }
+</div>
+
+<script>
+    function mostrarPreview(input) {
+        const ficheiro = input.files && input.files[0];
+        if (!ficheiro) return;
+
+        document.getElementById('nomeFicheiro').textContent = ficheiro.name;
+
+        const leitor = new FileReader();
+        leitor.onload = e => {
+            const img = document.getElementById('imgPreview');
+            img.src = e.target.result;
+            img.style.display = '';
+            document.getElementById('semImagem').style.display = 'none';
+        };
+        leitor.readAsDataURL(ficheiro);
+    }
+</script>

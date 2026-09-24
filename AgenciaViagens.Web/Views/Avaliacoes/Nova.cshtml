@@ -1,0 +1,52 @@
+﻿@model AgenciaViagens.Web.Controllers.AvaliacaoVM
+@{
+    var reserva = (AgenciaViagens.Domain.Entities.Reserva)ViewBag.Reserva;
+}
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>Como correu a viagem?</h1>
+        <p>@reserva.Pacote.Nome · @reserva.Pacote.Origem → @reserva.Pacote.Destino</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av" style="max-width:640px">
+
+        <form asp-action="Nova" method="post" class="av-caixa">
+            <input type="hidden" asp-for="ReservaId" />
+            <div asp-validation-summary="ModelOnly" class="av-aviso av-aviso-erro"></div>
+
+            <h2>A sua nota</h2>
+            <p>De 1 a 5 estrelas.</p>
+
+            <div class="av-estrelas-input">
+                @for (var i = 5; i >= 1; i--)
+                {
+                    <input type="radio" id="estrela@(i)" name="Classificacao" value="@i"
+                           checked="@(Model.Classificacao == i)" />
+                    <label for="estrela@(i)" title="@i estrela@(i > 1 ? "s" : "")">★</label>
+                }
+            </div>
+            <span asp-validation-for="Classificacao" class="av-erro"></span>
+
+            <h2 style="margin-top:26px">O que achou?</h2>
+            <p>O alojamento, os guias, o itinerário. Ajuda quem vai a seguir.</p>
+
+            <div class="av-campo-form">
+                <textarea asp-for="Comentario" rows="5" maxlength="1000"
+                          style="width:100%;padding:12px 14px;border:1px solid var(--linha);border-radius:6px;font-family:var(--ff-corpo);font-size:.95rem"
+                          placeholder="Escreva aqui"></textarea>
+                <span asp-validation-for="Comentario" class="av-erro"></span>
+            </div>
+
+            <button type="submit" class="btn-av btn-av-ocre">Enviar avaliação</button>
+            <a asp-controller="Reservas" asp-action="Detalhe" asp-route-id="@Model.ReservaId"
+               style="margin-left:14px;font-size:.9rem">Cancelar</a>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

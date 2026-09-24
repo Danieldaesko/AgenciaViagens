@@ -1,0 +1,64 @@
+﻿@model List<AgenciaViagens.Domain.Entities.Pacote>
+
+<div class="bo-topo">
+    <div>
+        <h1>Pacotes</h1>
+        <p>@Model.Count(p => p.Ativo) ativos · @Model.Count(p => !p.Ativo) desativados</p>
+    </div>
+    <a class="btn-av btn-av-ocre" asp-action="NovoPacote">Novo pacote</a>
+</div>
+
+<div class="bo-painel">
+    @if (Model.Any())
+    {
+        <table class="bo-tabela">
+            <thead>
+                <tr>
+                    <th>Pacote</th>
+                    <th>Percurso</th>
+                    <th>Partida</th>
+                    <th class="num">Preço</th>
+                    <th class="num">Lugares</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr class="@(p.Ativo ? "" : "bo-inativo")">
+                        <td>
+                            <strong>@p.Nome</strong>
+                            @if (p.EmDestaque)
+                            {
+                                <span class="av-estado av-estado-pendente" style="margin-left:6px">Destaque</span>
+                            }
+                            @if (p.EmPromocao)
+                            {
+                                <span class="av-estado av-estado-cancelada" style="margin-left:6px">Promoção</span>
+                            }
+                            <div style="font-size:.8rem;color:var(--cinza)">@p.Categoria</div>
+                        </td>
+                        <td>@p.Origem → @p.Destino</td>
+                        <td>@p.DataPartida.ToString("dd/MM/yyyy")</td>
+                        <td class="num">@((p.PrecoPromocao ?? p.PrecoBase).ToString("C0"))</td>
+                        <td class="num">@p.VagasOcupadas / @p.VagasTotal</td>
+                        <td>
+                            <div class="bo-acoes">
+                                <a class="bo-btn" asp-action="EditarPacote" asp-route-id="@p.Id">Editar</a>
+                                <form asp-action="AlternarPacote" asp-route-id="@p.Id" method="post">
+                                    <button type="submit" class="bo-btn @(p.Ativo ? "bo-btn-vermelho" : "bo-btn-verde")">
+                                        @(p.Ativo ? "Desativar" : "Ativar")
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="bo-vazio">Ainda não há pacotes. Crie o primeiro.</div>
+    }
+</div>

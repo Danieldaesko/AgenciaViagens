@@ -2,8 +2,6 @@
 using AgenciaViagens.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-
-
 namespace AgenciaViagens.Application.Services
 {
     public class ReservaService
@@ -30,13 +28,12 @@ namespace AgenciaViagens.Application.Services
                 .Include(r => r.Pacote)
                 .Include(r => r.Participantes)
                 .Include(r => r.Pagamentos)
+                .Include(r => r.Faturas)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task AdicionarAsync(Reserva reserva)
         {
-
-
             await _context.Reservas.AddAsync(reserva);
             await _context.SaveChangesAsync();
         }
@@ -101,16 +98,27 @@ namespace AgenciaViagens.Application.Services
         {
             return await _context.Reservas
                 .Include(r => r.Pacote)
-                .ThenInclude(p => p.Itinerarios)
+                    .ThenInclude(p => p.Itinerarios)
                 .Include(r => r.Participantes)
                 .Include(r => r.Pagamentos)
+                .Include(r => r.Faturas)
                 .FirstOrDefaultAsync(r => r.Id == reservaId && r.UtilizadorId == utilizadorId);
         }
 
-                public async Task<bool> PertenceAoUtilizadorAsync(int reservaId, int utilizadorId)
+        public async Task<bool> PertenceAoUtilizadorAsync(int reservaId, int utilizadorId)
         {
             return await _context.Reservas
                 .AnyAsync(r => r.Id == reservaId && r.UtilizadorId == utilizadorId);
+        }
+
+        public async Task<List<Reserva>> ObterTodasComDetalhesAsync()
+        {
+            return await _context.Reservas
+                .Include(r => r.Pacote)
+                .Include(r => r.Participantes)
+                .Include(r => r.Pagamentos)
+                .OrderByDescending(r => r.DataReserva)
+                .ToListAsync();
         }
 
         // ══ PARTICIPANTES ════════════════════════════════════
@@ -211,6 +219,7 @@ namespace AgenciaViagens.Application.Services
         {
             var reserva = await _context.Reservas
                 .Include(r => r.Pacote)
+                .Include(r => r.Pagamentos)
                 .FirstOrDefaultAsync(r => r.Id == reservaId);
 
             if (reserva is null)
@@ -229,7 +238,16 @@ namespace AgenciaViagens.Application.Services
                 _ => 0.00m
             };
 
-            var reembolso = reserva.PrecoTotal * percentagem;
+            // O reembolso incide sobre o que o cliente já pagou, não sobre o total
+            var jaPago = reserva.Pagamentos
+                .Where(p => p.Estado == "Pago")
+                .Sum(p => p.Valor);
+
+            var reembolso = Math.Round(jaPago * percentagem, 2);
+
+            // Referências Multibanco e transferências por pagar deixam de valer
+            foreach (var pendente in reserva.Pagamentos.Where(p => p.Estado == "Pendente"))
+                pendente.Estado = "Anulado";
 
             if (reserva.Estado == "Confirmada")
                 reserva.Pacote.VagasOcupadas -= reserva.NumParticipantes;
@@ -240,18 +258,5 @@ namespace AgenciaViagens.Application.Services
             await _context.SaveChangesAsync();
             return (true, null, reembolso);
         }
-
-        public async Task<List<Reserva>> ObterTodasComDetalhesAsync()
-        {
-            return await _context.Reservas
-                .Include(r => r.Pacote)
-                .Include(r => r.Participantes)
-                .Include(r => r.Pagamentos)
-                .OrderByDescending(r => r.DataReserva)
-                .ToListAsync();
-        }
     }
 }
-
-
-

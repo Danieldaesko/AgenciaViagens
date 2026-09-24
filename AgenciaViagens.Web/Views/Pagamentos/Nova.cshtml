@@ -1,0 +1,235 @@
+﻿@model AgenciaViagens.Web.Controllers.PagamentoVM
+@{
+    var reserva = (AgenciaViagens.Domain.Entities.Reserva)ViewBag.Reserva;
+    var disponivel = (decimal)ViewBag.Disponivel;
+    var podeSinal = (bool)ViewBag.PodeSinal;
+    var valorSinal = (decimal)ViewBag.ValorSinal;
+}
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>Pagamento</h1>
+        <p>Reserva #@reserva.Id.ToString("D5") · @reserva.Pacote.Nome</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av">
+        <form asp-action="Nova" method="post" class="av-reserva" id="formPagamento" autocomplete="off">
+            <input type="hidden" asp-for="ReservaId" />
+
+            <div>
+                <div asp-validation-summary="ModelOnly" class="av-aviso av-aviso-erro"></div>
+
+                <div class="av-caixa">
+                    <h2>Como quer pagar?</h2>
+                    <p>Os dados do cartão não ficam guardados.</p>
+
+                    <div class="av-metodos">
+                        <label class="av-metodo">
+                            <input type="radio" asp-for="Metodo" value="cartao" />
+                            Cartão<small>Visa, Mastercard</small>
+                        </label>
+                        <label class="av-metodo">
+                            <input type="radio" asp-for="Metodo" value="mbway" />
+                            MB Way<small>no telemóvel</small>
+                        </label>
+                        <label class="av-metodo">
+                            <input type="radio" asp-for="Metodo" value="multibanco" />
+                            Multibanco<small>referência</small>
+                        </label>
+                        <label class="av-metodo">
+                            <input type="radio" asp-for="Metodo" value="transferencia" />
+                            Transferência<small>IBAN</small>
+                        </label>
+                    </div>
+
+                    <!-- Cartão -->
+                    <div class="av-pag-seccao" data-metodo="cartao">
+                        <div class="av-cartao-visual">
+                            <div class="av-cv-topo">
+                                <span>AgenciaViagens</span>
+                                <span class="av-cv-bandeira" id="cvBandeira">Cartão</span>
+                            </div>
+                            <div class="av-cv-numero" id="cvNumero">•••• •••• •••• ••••</div>
+                            <div class="av-cv-baixo">
+                                <div><small>Titular</small><span id="cvTitular">O seu nome</span></div>
+                                <div><small>Validade</small><span id="cvValidade">MM/AA</span></div>
+                            </div>
+                        </div>
+
+                        <div class="av-campo-form">
+                            <label asp-for="NumeroCartao">Número do cartão</label>
+                            <input asp-for="NumeroCartao" id="numeroCartao" inputmode="numeric"
+                                   maxlength="23" placeholder="0000 0000 0000 0000" />
+                            <span asp-validation-for="NumeroCartao" class="av-erro"></span>
+                        </div>
+
+                        <div class="av-campo-form">
+                            <label asp-for="TitularCartao">Nome no cartão</label>
+                            <input asp-for="TitularCartao" id="titularCartao" placeholder="Como aparece no cartão" />
+                            <span asp-validation-for="TitularCartao" class="av-erro"></span>
+                        </div>
+
+                        <div class="av-campo-duplo">
+                            <div class="av-campo-form">
+                                <label asp-for="Validade">Validade</label>
+                                <input asp-for="Validade" id="validade" inputmode="numeric"
+                                       maxlength="5" placeholder="MM/AA" />
+                                <span asp-validation-for="Validade" class="av-erro"></span>
+                            </div>
+                            <div class="av-campo-form">
+                                <label asp-for="Cvv">CVV</label>
+                                <input asp-for="Cvv" id="cvv" type="password" inputmode="numeric"
+                                       maxlength="4" placeholder="3 dígitos atrás" />
+                                <span asp-validation-for="Cvv" class="av-erro"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MB Way -->
+                    <div class="av-pag-seccao" data-metodo="mbway">
+                        <div class="av-campo-form" style="max-width:280px">
+                            <label asp-for="Telemovel">Telemóvel associado ao MB Way</label>
+                            <input asp-for="Telemovel" id="telemovel" inputmode="numeric"
+                                   maxlength="9" placeholder="912 345 678" />
+                            <span asp-validation-for="Telemovel" class="av-erro"></span>
+                        </div>
+                        <p style="font-size:.86rem;color:var(--cinza)">
+                            Vai receber um pedido na app MB Way para aprovar o pagamento.
+                        </p>
+                    </div>
+
+                    <!-- Multibanco -->
+                    <div class="av-pag-seccao" data-metodo="multibanco">
+                        <div class="av-aviso av-aviso-info" style="margin:0">
+                            Geramos uma referência Multibanco para pagar num caixa ou no homebanking.
+                            A reserva fica paga assim que recebermos a confirmação.
+                        </div>
+                    </div>
+
+                    <!-- Transferência -->
+                    <div class="av-pag-seccao" data-metodo="transferencia">
+                        <div class="av-aviso av-aviso-info" style="margin:0">
+                            Mostramos-lhe o IBAN e a referência a indicar na transferência.
+                            Pode demorar até 2 dias úteis a ser confirmada.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="av-painel">
+                <div style="font-family:var(--ff-titulo);font-size:1.1rem;font-weight:700;color:var(--carvao);margin-bottom:14px">
+                    @reserva.Pacote.Nome
+                </div>
+
+                @if (podeSinal)
+                {
+                    <label class="av-modalidade">
+                        <input type="radio" asp-for="Modalidade" value="total" data-valor="@disponivel.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                        Pagar tudo agora
+                        <small>@disponivel.ToString("C")</small>
+                    </label>
+                    <label class="av-modalidade">
+                        <input type="radio" asp-for="Modalidade" value="sinal" data-valor="@valorSinal.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                        Pagar sinal de 30%
+                        <small>@valorSinal.ToString("C") agora, o resto até à partida</small>
+                    </label>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="Modalidade" value="total" />
+                    <p class="av-painel-nota" style="text-align:left">Falta pagar o restante da reserva.</p>
+                }
+
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 0">
+                    <span style="font-size:.9rem;color:var(--cinza)">A pagar agora</span>
+                    <span class="av-painel-preco" style="font-size:1.8rem" id="valorAPagar">@disponivel.ToString("C")</span>
+                </div>
+
+                <button type="submit" class="btn-av btn-av-ocre" id="btnPagar">Pagar</button>
+                <p class="av-painel-nota">Pagamento simulado para fins académicos.</p>
+
+                <a asp-controller="Reservas" asp-action="Detalhe" asp-route-id="@reserva.Id"
+                   style="display:block;text-align:center;font-size:.86rem;margin-top:10px">Voltar à reserva</a>
+            </aside>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function() {
+            const euros = v => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v);
+
+            // ── Mostrar a secção do método escolhido ──
+            const metodos = document.querySelectorAll('input[name="Metodo"]');
+            const seccoes = document.querySelectorAll('.av-pag-seccao');
+            const btnPagar = document.getElementById('btnPagar');
+
+            function atualizarMetodo() {
+                const escolhido = document.querySelector('input[name="Metodo"]:checked')?.value ?? 'cartao';
+                seccoes.forEach(s => s.classList.toggle('ativa', s.dataset.metodo === escolhido));
+                btnPagar.textContent = (escolhido === 'multibanco') ? 'Gerar referência'
+                    : (escolhido === 'transferencia') ? 'Ver dados da transferência'
+                        : 'Pagar';
+            }
+            metodos.forEach(m => m.addEventListener('change', atualizarMetodo));
+            if (!document.querySelector('input[name="Metodo"]:checked')) metodos[0].checked = true;
+            atualizarMetodo();
+
+            // ── Valor total ou sinal ──
+            const modalidades = document.querySelectorAll('input[name="Modalidade"][type="radio"]');
+            const elValor = document.getElementById('valorAPagar');
+            modalidades.forEach(m => m.addEventListener('change', () => {
+                elValor.textContent = euros(parseFloat(m.dataset.valor));
+            }));
+            if (modalidades.length && !document.querySelector('input[name="Modalidade"]:checked')) {
+                modalidades[0].checked = true;
+            }
+
+            // ── Cartão: formatação e pré-visualização ──
+            const numero = document.getElementById('numeroCartao');
+            const titular = document.getElementById('titularCartao');
+            const validade = document.getElementById('validade');
+            const cvv = document.getElementById('cvv');
+
+            function bandeira(d) {
+                if (/^4/.test(d)) return 'Visa';
+                if (/^3[47]/.test(d)) return 'Amex';
+                if (/^5[1-5]/.test(d) || /^2(2[2-9]|[3-6]\d|7[01]|720)/.test(d)) return 'Mastercard';
+                return 'Cartão';
+            }
+
+            numero.addEventListener('input', () => {
+                const d = numero.value.replace(/\D/g, '').slice(0, 19);
+                numero.value = d.replace(/(.{4})/g, '$1 ').trim();
+                const mostrar = (d + '•'.repeat(Math.max(0, 16 - d.length))).replace(/(.{4})/g, '$1 ').trim();
+                document.getElementById('cvNumero').textContent = mostrar;
+                document.getElementById('cvBandeira').textContent = bandeira(d);
+            });
+
+            titular.addEventListener('input', () => {
+                document.getElementById('cvTitular').textContent = titular.value || 'O seu nome';
+            });
+
+            validade.addEventListener('input', () => {
+                let d = validade.value.replace(/\D/g, '').slice(0, 4);
+                if (d.length >= 3) d = d.slice(0, 2) + '/' + d.slice(2);
+                validade.value = d;
+                document.getElementById('cvValidade').textContent = d || 'MM/AA';
+            });
+
+            cvv.addEventListener('input', () => { cvv.value = cvv.value.replace(/\D/g, '').slice(0, 4); });
+
+            const tel = document.getElementById('telemovel');
+            tel.addEventListener('input', () => { tel.value = tel.value.replace(/\D/g, '').slice(0, 9); });
+
+            // Evita duplo clique
+            document.getElementById('formPagamento').addEventListener('submit', () => {
+                btnPagar.disabled = true;
+                btnPagar.textContent = 'A processar…';
+            });
+        })();
+    </script>
+}

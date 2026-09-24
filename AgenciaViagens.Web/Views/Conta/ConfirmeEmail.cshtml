@@ -1,0 +1,28 @@
+﻿@{
+    var email = ViewBag.Email as string;
+}
+
+<div class="av-form-pagina">
+    <div class="av-form-caixa" style="text-align:center">
+        <div class="av-sucesso-icone av-pendente-icone" style="margin:0 auto 16px">✉</div>
+        <h1>Confirme o seu email</h1>
+        <p>
+            Enviámos um link de ativação para <strong>@email</strong>.
+            Carregue nele para poder entrar.
+        </p>
+
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="av-aviso av-aviso-ok">@TempData["Sucesso"]</div>
+        }
+
+        <form asp-action="ReenviarAtivacao" method="post" style="margin-top:20px">
+            <input type="hidden" name="email" value="@email" />
+            <button type="submit" class="btn-av btn-av-linha">Reenviar o link</button>
+        </form>
+
+        <div class="av-form-rodape">
+            Já confirmou? <a asp-action="Login">Entrar</a>
+        </div>
+    </div>
+</div>

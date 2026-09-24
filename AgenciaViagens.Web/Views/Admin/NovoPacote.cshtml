@@ -1,0 +1,19 @@
+﻿@model AgenciaViagens.Domain.Entities.Pacote
+
+<div class="bo-topo">
+    <div>
+        <h1>Novo pacote</h1>
+        <p>Fica visível no site assim que for guardado.</p>
+    </div>
+</div>
+
+<form asp-action="NovoPacote" method="post" enctype="multipart/form-data" style="max-width:760px">
+    <partial name="_FormPacote" model="Model" />
+
+    <button type="submit" class="btn-av btn-av-ocre">Criar pacote</button>
+    <a asp-action="Pacotes" style="margin-left:14px;font-size:.9rem">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,43 @@
+﻿@model List<AgenciaViagens.Domain.Entities.Avaliacao>
+
+<section class="av-cabecalho">
+    <div class="container-av">
+        <h1>As minhas avaliações</h1>
+        <p>O que escreveu sobre as suas viagens.</p>
+    </div>
+</section>
+
+<section class="av-seccao">
+    <div class="container-av" style="max-width:760px">
+        @if (Model.Any())
+        {
+            @foreach (var a in Model)
+            {
+                <div class="av-avaliacao-cartao">
+                    <div class="av-avaliacao-topo">
+                        <strong>@a.Pacote.Nome</strong>
+                        @if (a.Aprovada)
+                        {
+                            <span class="av-estado av-estado-confirmada">Publicada</span>
+                        }
+                        else
+                        {
+                            <span class="av-estado av-estado-pendente">Em revisão</span>
+                        }
+                    </div>
+                    <div class="av-estrelas">@(new string('★', a.Classificacao))@(new string('☆', 5 - a.Classificacao))</div>
+                    <p style="margin:8px 0 6px">@a.Comentario</p>
+                    <time style="font-size:.8rem;color:var(--cinza)">@a.Data.ToString("dd/MM/yyyy")</time>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="av-vazio">
+                <h3>Ainda não avaliou nenhuma viagem</h3>
+                <p>Depois de regressar, pode avaliar a viagem a partir do detalhe da reserva.</p>
+                <a class="btn-av btn-av-azul" asp-controller="Reservas" asp-action="Minhas">Ver as minhas reservas</a>
+            </div>
+        }
+    </div>
+</section>

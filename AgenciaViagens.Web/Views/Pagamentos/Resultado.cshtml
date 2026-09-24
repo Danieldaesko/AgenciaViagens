@@ -1,0 +1,64 @@
+﻿@model AgenciaViagens.Domain.Entities.Pagamento
+@{
+    var multibanco = Model.Metodo == "Multibanco";
+    var transferencia = Model.Metodo.StartsWith("Transferência");
+    var pago = Model.Estado == "Pago";
+}
+
+<section class="av-seccao">
+    <div class="container-av" style="max-width:600px">
+        <div class="av-caixa">
+
+            @if (pago)
+            {
+                <div class="av-sucesso-icone">✓</div>
+                <h2>Pagamento recebido</h2>
+                <p>Obrigado. Enviámos o recibo para o seu email.</p>
+            }
+            else
+            {
+                <div class="av-sucesso-icone av-pendente-icone">!</div>
+                <h2>Falta só um passo</h2>
+                <p>A reserva fica paga assim que recebermos o pagamento.</p>
+            }
+
+            @if (multibanco)
+            {
+                <div class="av-referencia">
+                    <div><span>Entidade</span><strong>@AgenciaViagens.Application.Services.PagamentoService.EntidadeMultibanco</strong></div>
+                    <div><span>Referência</span><strong>@ViewBag.ReferenciaMb</strong></div>
+                    <div><span>Valor</span><strong>@Model.Valor.ToString("C")</strong></div>
+                </div>
+                <p style="font-size:.86rem;color:var(--cinza)">
+                    Pague em qualquer caixa Multibanco ou no homebanking, em "Pagamento de serviços".
+                    A referência é válida durante 3 dias.
+                </p>
+            }
+            else if (transferencia)
+            {
+                <div class="av-referencia">
+                    <div><span>IBAN</span><strong style="font-size:.95rem">@AgenciaViagens.Application.Services.PagamentoService.IbanAgencia</strong></div>
+                    <div><span>Titular</span><strong style="font-size:.95rem">AgenciaViagens, Lda</strong></div>
+                    <div><span>Descritivo</span><strong>@Model.Referencia</strong></div>
+                    <div><span>Valor</span><strong>@Model.Valor.ToString("C")</strong></div>
+                </div>
+                <p style="font-size:.86rem;color:var(--cinza)">
+                    Indique o descritivo na transferência para identificarmos o pagamento.
+                </p>
+            }
+            else
+            {
+                <div class="av-linhas-detalhe" style="margin:18px 0">
+                    <div class="av-linha-detalhe"><span>Método</span><span>@Model.Metodo</span></div>
+                    <div class="av-linha-detalhe"><span>Referência</span><span>@Model.Referencia</span></div>
+                    <div class="av-linha-detalhe"><span>Data</span><span>@Model.Data.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span></div>
+                    <div class="av-linha-detalhe destaque"><span>Valor</span><span>@Model.Valor.ToString("C")</span></div>
+                </div>
+            }
+
+            <a class="btn-av btn-av-azul" asp-controller="Reservas" asp-action="Detalhe" asp-route-id="@Model.ReservaId">
+                Ver a reserva
+            </a>
+        </div>
+    </div>
+</section>

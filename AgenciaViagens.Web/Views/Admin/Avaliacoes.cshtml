@@ -1,0 +1,53 @@
+﻿@model List<AgenciaViagens.Domain.Entities.Avaliacao>
+
+<div class="bo-topo">
+    <div>
+        <h1>Avaliações</h1>
+        <p>Reveja o que os clientes escreveram antes de publicar no site.</p>
+    </div>
+</div>
+
+<div class="bo-painel">
+    @if (Model.Any())
+    {
+        <table class="bo-tabela">
+            <thead>
+                <tr>
+                    <th>Viagem</th>
+                    <th>Nota</th>
+                    <th>Comentário</th>
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td><strong>@a.Pacote.Nome</strong></td>
+                        <td style="color:var(--laranja);white-space:nowrap">
+                            @(new string('★', a.Classificacao))@(new string('☆', 5 - a.Classificacao))
+                        </td>
+                        <td style="max-width:380px">@a.Comentario</td>
+                        <td style="white-space:nowrap">@a.Data.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <div class="bo-acoes">
+                                <form asp-action="AprovarAvaliacao" asp-route-id="@a.Id" method="post">
+                                    <button type="submit" class="bo-btn bo-btn-verde">Publicar</button>
+                                </form>
+                                <form asp-action="RejeitarAvaliacao" asp-route-id="@a.Id" method="post"
+                                      onsubmit="return confirm('Remover esta avaliação?');">
+                                    <button type="submit" class="bo-btn bo-btn-vermelho">Remover</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="bo-vazio">Não há avaliações à espera de revisão.</div>
+    }
+</div>
