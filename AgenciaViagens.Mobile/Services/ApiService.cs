@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading.Tasks;
 using AgenciaViagens.Mobile.Models;
 
 namespace AgenciaViagens.Mobile.Services;
@@ -47,6 +46,27 @@ public class ApiService
             : new AuthenticationHeaderValue("Bearer", token);
     }
 
+    /// <summary>
+    /// Traduz uma falha de rede numa mensagem útil durante o desenvolvimento.
+    /// </summary>
+    private static string DescreverFalha(Exception ex)
+    {
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine($"[API] {ex}");
+        return $"Falha de ligação: {ex.GetBaseException().Message}";
+#else
+        return "Não foi possível ligar ao servidor.";
+#endif
+    }
+
+    private static string DescreverEstado(HttpStatusCode codigo) => codigo switch
+    {
+        HttpStatusCode.Unauthorized => "Sessão inválida ou expirada.",
+        HttpStatusCode.Forbidden => "Não tem permissão para esta operação.",
+        HttpStatusCode.NotFound => "Recurso não encontrado (verifique a rota).",
+        _ => $"O servidor respondeu {(int)codigo} {codigo}."
+    };
+
     // ── AUTENTICAÇÃO ──────────────────────────────────
 
     public async Task<LoginResposta> LoginAsync(string email, string password)
@@ -57,7 +77,13 @@ public class ApiService
                 new LoginPedido { Email = email, Password = password });
 
             if (!resposta.IsSuccessStatusCode)
-                return new LoginResposta { Sucesso = false, Mensagem = "Email ou palavra-passe incorretos." };
+            {
+                var motivo = resposta.StatusCode == HttpStatusCode.Unauthorized
+                    ? "Email ou palavra-passe incorretos."
+                    : DescreverEstado(resposta.StatusCode);
+
+                return new LoginResposta { Sucesso = false, Mensagem = motivo };
+            }
 
             var resultado = await resposta.Content.ReadFromJsonAsync<LoginResposta>(JsonOpts);
 
@@ -70,9 +96,9 @@ public class ApiService
 
             return resultado ?? new LoginResposta { Sucesso = false, Mensagem = "Resposta inválida." };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new LoginResposta { Sucesso = false, Mensagem = "Não foi possível ligar ao servidor." };
+            return new LoginResposta { Sucesso = false, Mensagem = DescreverFalha(ex) };
         }
     }
 
@@ -126,12 +152,23 @@ public class ApiService
 
     public async Task<(bool Sucesso, string Mensagem)> CancelarReservaAsync(int id)
     {
-        await PrepararAuthAsync();
-        var resposta = await _http.PutAsync($"reserva/{id}/cancelar", null);
-        var corpo = await resposta.Content.ReadAsStringAsync();
+        try
+        {
+            await PrepararAuthAsync();
+            var resposta = await _http.PutAsync($"reserva/{id}/cancelar", null);
 
-        return resposta.IsSuccessStatusCode
-            ? (true, "Reserva cancelada.")
-            : (false, "Não foi possível cancelar a reserva.");
+            if (resposta.IsSuccessStatusCode)
+                return (true, "Reserva cancelada.");
+
+            var corpo = await resposta.Content.ReadAsStringAsync();
+
+            return (false, string.IsNullOrWhiteSpace(corpo)
+                ? DescreverEstado(resposta.StatusCode)
+                : corpo);
+        }
+        catch (Exception ex)
+        {
+            return (false, DescreverFalha(ex));
+        }
     }
 }

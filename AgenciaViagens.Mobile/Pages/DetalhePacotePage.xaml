@@ -9,7 +9,10 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <BoxView HeightRequest="180" Color="{StaticResource Violeta}" />
+            <Image Source="{Binding Pacote.Imagem}"
+                   Aspect="AspectFill"
+                   HeightRequest="180"
+                   BackgroundColor="{StaticResource Violeta}" />
 
             <VerticalStackLayout Padding="18" Spacing="16" BindingContext="{Binding Pacote}">
 

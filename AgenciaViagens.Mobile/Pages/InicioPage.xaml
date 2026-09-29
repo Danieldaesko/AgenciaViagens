@@ -34,7 +34,11 @@
                                 </Border.GestureRecognizers>
 
                                 <VerticalStackLayout>
-                                    <BoxView HeightRequest="120" Color="{StaticResource Violeta}" />
+                                    <Image Source="{Binding ImagemUrl, Converter={StaticResource UrlImagem}}"
+                                           Aspect="AspectFill"
+                                           HeightRequest="120"
+                                           BackgroundColor="{StaticResource Violeta}" />
+
                                     <VerticalStackLayout Padding="14" Spacing="5">
                                         <Label Text="{Binding Percurso}" FontSize="11"
                                                TextColor="{StaticResource Cinza}" />
@@ -63,7 +67,7 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:PacoteModel">
                             <Border BackgroundColor="White" StrokeThickness="0"
-                                    Margin="0,0,0,10" Padding="14">
+                                    Margin="0,0,0,10" Padding="12">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="12" />
                                 </Border.StrokeShape>
@@ -73,14 +77,31 @@
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
 
-                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                    <Label Grid.Row="0" Text="{Binding Percurso}" FontSize="11"
-                                           TextColor="{StaticResource Cinza}" />
-                                    <Label Grid.Row="1" Text="{Binding Nome}" FontSize="15"
-                                           FontAttributes="Bold" TextColor="{StaticResource Carvao}" />
-                                    <Label Grid.Row="2" Text="{Binding ResumoDatas}" FontSize="11"
-                                           TextColor="{StaticResource Cinza}" />
-                                    <Label Grid.Column="1" Grid.RowSpan="3"
+                                <Grid ColumnDefinitions="76,*,Auto"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      ColumnSpacing="12">
+
+                                    <Border Grid.Column="0" Grid.RowSpan="3"
+                                            StrokeThickness="0"
+                                            HeightRequest="76" WidthRequest="76"
+                                            VerticalOptions="Center">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="8" />
+                                        </Border.StrokeShape>
+                                        <Image Source="{Binding ImagemUrl, Converter={StaticResource UrlImagem}}"
+                                               Aspect="AspectFill"
+                                               BackgroundColor="{StaticResource Violeta}" />
+                                    </Border>
+
+                                    <Label Grid.Column="1" Grid.Row="0" Text="{Binding Percurso}"
+                                           FontSize="11" TextColor="{StaticResource Cinza}" />
+                                    <Label Grid.Column="1" Grid.Row="1" Text="{Binding Nome}"
+                                           FontSize="15" FontAttributes="Bold" MaxLines="2"
+                                           TextColor="{StaticResource Carvao}" />
+                                    <Label Grid.Column="1" Grid.Row="2" Text="{Binding ResumoDatas}"
+                                           FontSize="11" TextColor="{StaticResource Cinza}" />
+
+                                    <Label Grid.Column="2" Grid.RowSpan="3"
                                            Text="{Binding PrecoFormatado}"
                                            FontSize="19" FontAttributes="Bold"
                                            TextColor="{StaticResource Laranja}"
@@ -93,4 +114,4 @@
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
-</ContentPage>    
+</ContentPage>

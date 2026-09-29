@@ -5,11 +5,10 @@ using AgenciaViagens.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +61,7 @@ builder.Services.AddScoped<PagamentoService>();
 builder.Services.AddScoped<FaturaService>();
 builder.Services.AddScoped<PdfService>();
 builder.Services.AddScoped<XmlExportService>();
+
 // 3. Adicionar CORS (Essencial para permitir pedidos do .NET MAUI e Web)
 builder.Services.AddCors(options =>
 {
@@ -148,6 +148,42 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AgenciaViagens API v1");
     c.RoutePrefix = "swagger";
 });
+
+// 6b. Servir as imagens dos pacotes, que residem no wwwroot do projeto Web.
+// A pasta é procurada subindo na árvore de diretórios, para não depender da
+// profundidade a que a API está em relação à solução.
+// Em produção isto passaria para armazenamento partilhado ou CDN.
+string? pastaImagens = null;
+var dirProcura = new DirectoryInfo(app.Environment.ContentRootPath);
+
+while (dirProcura is not null && pastaImagens is null)
+{
+    var candidato = Path.Combine(dirProcura.FullName, "AgenciaViagens.Web", "wwwroot", "images");
+    if (Directory.Exists(candidato))
+        pastaImagens = candidato;
+
+    dirProcura = dirProcura.Parent;
+}
+
+var loggerImagens = app.Services.GetRequiredService<ILogger<Program>>();
+
+if (pastaImagens is not null)
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(pastaImagens),
+        RequestPath = "/images"
+    });
+
+    var quantos = Directory.GetFiles(pastaImagens, "*.*", SearchOption.AllDirectories).Length;
+    loggerImagens.LogInformation("IMAGENS: a servir {Quantos} ficheiro(s) de {Pasta}", quantos, pastaImagens);
+}
+else
+{
+    loggerImagens.LogWarning(
+        "IMAGENS: pasta não encontrada a partir de {Raiz}. Verifique se existe AgenciaViagens.Web\\wwwroot\\images.",
+        app.Environment.ContentRootPath);
+}
 
 app.UseHttpsRedirection();
 

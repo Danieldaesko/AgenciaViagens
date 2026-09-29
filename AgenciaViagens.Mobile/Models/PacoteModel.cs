@@ -36,4 +36,23 @@ public class PacoteModel
     public string TextoVagas => VagasDisponiveis <= 3
         ? $"Só {VagasDisponiveis} lugares"
         : $"{VagasDisponiveis} lugares";
+
+    // Imagem empacotada na app, escolhida pelo destino.
+    // Permite mostrar fotos sem dependência de rede no dispositivo.
+    public string ImagemLocal
+    {
+        get
+        {
+            var d = (Destino ?? string.Empty).Trim().ToLowerInvariant();
+
+            if (d.Contains("roma")) return "roma.jpg";
+            if (d.Contains("barcelona")) return "barcelona.jpg";
+            if (d.Contains("luanda")) return "luanda.jpg";
+            if (d.Contains("lubango") || d.Contains("huila")) return "huila.jpg";
+            if (d.Contains("rio")) return "rio.jpg";
+
+            return string.Empty;   // fica a cor de fundo do cartão
+        }
+    }
+
 }
